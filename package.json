@@ -1,0 +1,17 @@
+{
+  "name": "azf-user-info",
+  "version": "1.0.0",
+  "description": "Api for getting user info from cached users",
+  "scripts": {
+    "test": "echo \"No tests yet...\""
+  },
+  "author": "jorgtho",
+  "dependencies": {
+    "@azure/msal-node": "^1.12.1",
+    "@vtfk/logger": "^4.3.2",
+    "axios": "^0.27.2",
+    "client-oauth2": "^4.3.3",
+    "mongodb": "^4.9.0",
+    "node-cache": "^5.1.2"
+  }
+}
