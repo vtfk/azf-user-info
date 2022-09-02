@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Api for getting user info from cached users",
   "scripts": {
-    "test": "echo \"No tests yet...\""
+    "test": "jest"
   },
   "author": "jorgtho",
   "dependencies": {
@@ -13,5 +13,14 @@
     "client-oauth2": "^4.3.3",
     "mongodb": "^4.9.0",
     "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "jest": "27.5.1",
+    "standard": "16.0.4"
+  },
+  "standard": {
+    "env": [
+      "jest"
+    ]
   }
 }

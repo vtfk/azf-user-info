@@ -14,9 +14,12 @@ module.exports = {
     tenantId: process.env.GRAPH_TENANT_ID ?? 'tenant id',
     scope: process.env.GRAPH_SCOPE ?? 'etSkikkeligSkuup'
   },
-  unknownValue: process.env.UNKNOWN_VALUE ?? 'UKJENT',
+  unknownValue: process.env.UNKNOWN_VALUE ?? null,
   mongoDB: {
     connectionStringReadWrite: process.env.MONGO_DB_CONNECTION_STRING_READ_WRITE ?? 'tullball',
-    database: process.env.MONGO_DB_DATABASE ?? 'tulliballa'
-  }
+    database: process.env.MONGO_DB_DATABASE ?? 'tulliballa',
+    employeeCollection: process.env.MONGO_DB_EMPLOYEE_COLLECTION ?? 'jauddaaa',
+    studentCollection: process.env.MONGO_DB_STUDENT_COLLECTION ?? 'jauddaaa'
+  },
+  deleteAfterInactiveDays: process.env.DELETE_AFTER_INACTIVE_DAYS ?? 90
 }
