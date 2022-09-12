@@ -1,15 +1,15 @@
-const bakeEmployees = require('../lib/employee/bakeEmployees')
-const mongo = require('../lib/mongo')
+const { bakeEmployees } = require('../lib/employee/bakeEmployees')
 const { mongoDB } = require('../config')
+const switchMainCollection = require('../lib/switchMainCollection')
+
 
 module.exports = async function (context, req) {
-    try {
+  try {
     const employeeData = await bakeEmployees()
-    const db = await mongo()
-    const collection = db.collection(mongoDB.employeeCollection)
-    await collection.drop()
-    const insertResult = await collection.insertMany(employeeData)
-    return { status: 200, body: insertResult }
+
+    const res = switchMainCollection(mongoDB.employeeCollection, employeeData)
+
+    return { status: 200, body: res }
   } catch (error) {
     console.log(error)
     return { status: 500, body: error.message }

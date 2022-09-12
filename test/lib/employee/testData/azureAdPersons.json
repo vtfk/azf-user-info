@@ -1,0 +1,100 @@
+{
+    "azureAdPersons": {
+        "count": 5,
+        "value": [
+          {
+            "userType": "Member",
+            "userPrincipalName": "guri@vtfk.no",
+            "onPremisesSamAccountName": "guri1208",
+            "officeLocation": "Gul vgs",
+            "onPremisesSyncEnabled": true,
+            "mobilePhone": "12345678",
+            "id": "fdkjfj",
+            "onPremisesExtensionAttributes": {
+              "extensionAttribute1": null,
+              "extensionAttribute2": null,
+              "extensionAttribute3": "FA",
+              "extensionAttribute4": null,
+              "extensionAttribute5": null,
+              "extensionAttribute6": "GUL",
+              "extensionAttribute7": "BLÅ",
+              "extensionAttribute8": null,
+              "extensionAttribute9": "00000001",
+              "extensionAttribute10": null,
+              "extensionAttribute11": null,
+              "extensionAttribute12": null,
+              "extensionAttribute13": null,
+              "extensionAttribute14": null,
+              "extensionAttribute15": null
+            },
+            "manager": {
+              "@odata.type": "#microsoft.graph.user",
+              "displayName": "Herr sjef",
+              "userPrincipalName": "herr.sjef@vtfk.no"
+            }
+          },
+          {
+            "userType": "Member",
+            "userPrincipalName": "petter@vtfk.no",
+            "onPremisesSamAccountName": "pet2802",
+            "officeLocation": "Fylkeshuset 1",
+            "onPremisesSyncEnabled": true,
+            "mobilePhone": null,
+            "id": "fdfd",
+            "onPremisesExtensionAttributes": {
+              "extensionAttribute1": null,
+              "extensionAttribute2": null,
+              "extensionAttribute3": "F",
+              "extensionAttribute4": null,
+              "extensionAttribute5": null,
+              "extensionAttribute6": "FOLK",
+              "extensionAttribute7": null,
+              "extensionAttribute8": null,
+              "extensionAttribute9": "00000002",
+              "extensionAttribute10": null,
+              "extensionAttribute11": null,
+              "extensionAttribute12": null,
+              "extensionAttribute13": null,
+              "extensionAttribute14": null,
+              "extensionAttribute15": null
+            },
+            "manager": {
+              "@odata.type": "#microsoft.graph.user",
+              "displayName": "Fru sjef",
+              "userPrincipalName": "fru.sjef@vtfk.no"
+            }
+          },
+          {
+            "userType": "Member",
+            "userPrincipalName": "klaus@vtfk.no",
+            "onPremisesSamAccountName": "kla1807",
+            "officeLocation": "Fylkeshuset 2",
+            "onPremisesSyncEnabled": true,
+            "mobilePhone": "12345555",
+            "id": "fdfdfdf",
+            "onPremisesExtensionAttributes": {
+              "extensionAttribute1": null,
+              "extensionAttribute2": null,
+              "extensionAttribute3": "FA",
+              "extensionAttribute4": null,
+              "extensionAttribute5": null,
+              "extensionAttribute6": "JUL",
+              "extensionAttribute7": "SOMMER",
+              "extensionAttribute8": null,
+              "extensionAttribute9": "00000003",
+              "extensionAttribute10": null,
+              "extensionAttribute11": null,
+              "extensionAttribute12": null,
+              "extensionAttribute13": null,
+              "extensionAttribute14": null,
+              "extensionAttribute15": null
+            },
+            "manager": {
+              "@odata.type": "#microsoft.graph.user",
+              "displayName": "Super sjef",
+              "userPrincipalName": "super.sjef@vtfk.no"
+            }
+          }
+        ]
+      }
+}

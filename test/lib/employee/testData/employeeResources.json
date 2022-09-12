@@ -1,0 +1,46 @@
+{
+    "employeeResources": [
+        {
+          "ansattnummer": "00000001",
+          "ansettelsesperiode": {
+            "start": "2021-08-01T00:00:00Z",
+            "slutt": "2022-06-30T23:59:59Z"
+          },
+          "brukernavn": "GURISEN, GURI",
+          "kontaktEpostadresse": "guri@vtfk.no",
+          "ansiennitet": null,
+          "arbeidsforhold": [
+            "01"
+          ],
+          "personalressurskategori": "U"
+        },
+        {
+          "ansattnummer": "00000002",
+          "ansettelsesperiode": {
+            "start": "2018-03-01T00:00:00Z",
+            "slutt": null
+          },
+          "brukernavn": "pet2802",
+          "kontaktEpostadresse": "pettermann@vtfk.no",
+          "ansiennitet": null,
+          "arbeidsforhold": [
+            "02"
+          ],
+          "personalressurskategori": "SE"
+        },
+        {
+          "ansattnummer": "00000003",
+          "ansettelsesperiode": {
+            "start": "2022-09-02T00:00:00Z",
+            "slutt": null
+          },
+          "brukernavn": "noper",
+          "kontaktEpostadresse": "lok@lokesen.no",
+          "ansiennitet": null,
+          "arbeidsforhold": [
+            "03"
+          ],
+          "personalressurskategori": "M"
+        }
+      ]
+}

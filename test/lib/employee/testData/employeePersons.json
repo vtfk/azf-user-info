@@ -1,0 +1,49 @@
+{
+    "employeePersons": [
+        {
+          "fodselsnummer": "00000000001",
+          "fornavn": "Guri",
+          "etternavn": "Gurisen",
+          "privatEpostadresse": "guri@guri.com",
+          "bostedsadresse": {
+            "adresselinje": [
+              "Guridalen 250"
+            ],
+            "postnummer": "1234",
+            "poststed": "GURISTED"
+          },
+          "kjonn": "2",
+          "ansattnummer": "00000001"
+        },
+        {
+          "fodselsnummer": "00000000002",
+          "fornavn": "Petter",
+          "etternavn": "Petterson",
+          "privatEpostadresse": "petter@petter.com",
+          "bostedsadresse": {
+            "adresselinje": [
+              "Petterveien 29"
+            ],
+            "postnummer": "1235",
+            "poststed": "PETTERSTAD"
+          },
+          "kjonn": "1",
+          "ansattnummer": "00000002"
+        },
+        {
+          "fodselsnummer": "00000000003",
+          "fornavn": "Klaus",
+          "etternavn": "Klønesen",
+          "privatEpostadresse": "klaus@klaus.com",
+          "bostedsadresse": {
+            "adresselinje": [
+              "Klausveien 4"
+            ],
+            "postnummer": "2222",
+            "poststed": "KLAUSSTED"
+          },
+          "kjonn": "1",
+          "ansattnummer": "00000003"
+        }
+      ]
+}

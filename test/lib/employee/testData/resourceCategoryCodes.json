@@ -1,0 +1,19 @@
+{
+    "resourceCategoryCodes": [
+        {
+          "systemId": "F",
+          "kode": "F",
+          "navn": "Fast ansatt"
+        },
+        {
+          "systemId": "L",
+          "kode": "L",
+          "navn": "Løk"
+        },
+        {
+          "systemId": "U",
+          "kode": "U",
+          "navn": "Utedo"
+        }
+      ]
+}

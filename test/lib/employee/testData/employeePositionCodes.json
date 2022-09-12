@@ -1,0 +1,19 @@
+{
+    "employeePositionCodes": [
+        {
+          "systemId": "01",
+          "kode": "01",
+          "navn": "Byggvraker"
+        },
+        {
+          "systemId": "02",
+          "kode": "02",
+          "navn": "Ekstra tyggis"
+        },
+        {
+          "systemId": "03",
+          "kode": "03",
+          "navn": "Tillitsbryter"
+        }
+      ]
+}

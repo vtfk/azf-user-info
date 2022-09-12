@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Api for getting user info from cached users",
   "scripts": {
-    "test": "jest"
+    "test": "jest --verbose",
+    "generateDS": "$env:DEV_MODE='true'; node './test/lib/employee/testData/generateDataTemplates.js'"
   },
   "author": "jorgtho",
   "dependencies": {
@@ -15,6 +16,7 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
+    "dotenv": "^16.0.2",
     "jest": "27.5.1",
     "standard": "16.0.4"
   },

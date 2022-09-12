@@ -3,7 +3,7 @@ const mongo = require('../lib/mongo')
 const { mongoDB } = require('../config')
 
 module.exports = async function (context, req) {
-    try {
+  try {
     const studentData = await bakeStudents()
     const db = await mongo()
     const collection = db.collection(mongoDB.studentCollection)

@@ -1,0 +1,67 @@
+{
+    "employeePositions": [
+        {
+          "systemId": "01",
+          "ansettelsesprosent": 10000,
+          "arbeidsforholdsperiode": {
+            "start": "2019-02-11T00:00:00Z",
+            "slutt": null
+          },
+          "gyldighetsperiode": {
+            "start": "2021-08-24T00:00:00Z",
+            "slutt": "2050-09-30T23:59:59Z"
+          },
+          "hovedstilling": true,
+          "stillingsnummer": "1",
+          "stillingstittel": "Elevveiarbeider",
+          "arbeidsforholdstype": "F",
+          "stillingskode": "01",
+          "arbeidssted": "01",
+          "ansvar": "2--66700",
+          "funksjon": "3--562",
+          "prosjekt": null
+        },
+        {
+          "systemId": "02",
+          "ansettelsesprosent": 0,
+          "arbeidsforholdsperiode": {
+            "start": "2021-01-01T00:00:00Z",
+            "slutt": null
+          },
+          "gyldighetsperiode": {
+            "start": "2050-03-01T00:00:00Z",
+            "slutt": null
+          },
+          "hovedstilling": true,
+          "stillingsnummer": "1",
+          "stillingstittel": "Folkefyr",
+          "arbeidsforholdstype": "L",
+          "stillingskode": "02",
+          "arbeidssted": "02",
+          "ansvar": "2--10800",
+          "funksjon": "3--400",
+          "prosjekt": null
+        },
+        {
+          "systemId": "03",
+          "ansettelsesprosent": 10000,
+          "arbeidsforholdsperiode": {
+            "start": "1988-09-01T00:00:00Z",
+            "slutt": null
+          },
+          "gyldighetsperiode": {
+            "start": "2021-10-01T00:00:00Z",
+            "slutt": "2021-12-31T23:59:59Z"
+          },
+          "hovedstilling": true,
+          "stillingsnummer": "1",
+          "stillingstittel": "Adverb",
+          "arbeidsforholdstype": "U",
+          "stillingskode": "03",
+          "arbeidssted": "229",
+          "ansvar": "2--67200",
+          "funksjon": "3--528",
+          "prosjekt": null
+        }
+      ]
+}
