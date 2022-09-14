@@ -1,8 +1,9 @@
 const mongo = require('../lib/mongo')
-const { mongoDB } = require('../config')
+const { mongoDB, appRoles } = require('../config')
+const { verifyRoles } = require('../lib/verifyTokenClaims')
 
 const query = { userPrincipalName: { $ne: null }, harAktivtArbeidsforhold: true }
-const projection2 = {
+const projection = {
   userPrincipalName: 1,
   fornavn: 1,
   etternavn: 1,
@@ -16,6 +17,9 @@ const projection2 = {
 
 // prøv ut https://www.mongodb.com/docs/manual/tutorial/project-fields-from-query-results/
 module.exports = async function (context, req) {
+  // Verify that the users have access to this endpoint
+  if (!verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) return { status: 401, body: 'You are not authorized to access this resource' }
+
   const db = await mongo()
   const collection = db.collection(mongoDB.employeeCollection)
   try {

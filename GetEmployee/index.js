@@ -1,5 +1,6 @@
 const mongo = require('../lib/mongo')
-const { mongoDB } = require('../config')
+const { mongoDB, appRoles } = require('../config')
+const { verifyRoles } = require('../lib/verifyTokenClaims')
 
 const determineParam = (id) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
@@ -15,6 +16,9 @@ const determineParam = (id) => {
 }
 
 module.exports = async function (context, req) {
+  // Verify that the users have access to this endpoint
+  if (!verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) return { status: 401, body: 'You are not authorized to access this resource' }
+
   if (!req.params.id) return { status: 400, body: 'Please specify query param {id} with an ssn, upn, or samAccountName' }
   const query = determineParam(req.params.id)
   if (!query) return { status: 400, body: 'Please specify VALID query param {id} with an ssn, upn, or samAccountName' }
@@ -24,7 +28,7 @@ module.exports = async function (context, req) {
   try {
     const filteredDocs = await collection.find({ [query.prop]: query.value }).toArray()
     if (filteredDocs.length === 0) {
-      return { status: 404, body: `No users found with "${query.prop}: ${query.value}"` }
+      return { status: 404, body: `No users found with "${query.prop}: "${query.value}"` }
     }
     return { status: 200, body: filteredDocs }
   } catch (error) {

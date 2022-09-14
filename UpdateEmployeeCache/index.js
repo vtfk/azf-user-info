@@ -2,7 +2,6 @@ const { bakeEmployees } = require('../lib/employee/bakeEmployees')
 const { mongoDB } = require('../config')
 const switchMainCollection = require('../lib/switchMainCollection')
 
-
 module.exports = async function (context, req) {
   try {
     const employeeData = await bakeEmployees()

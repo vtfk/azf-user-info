@@ -27,5 +27,9 @@ module.exports = {
     orgCollection: process.env.MONGO_DB_ORG_COLLECTION ?? 'jauddaaa'
   },
   deleteAfterInactiveDays: process.env.DELETE_AFTER_INACTIVE_DAYS ?? 90,
-  mock: !!(process.env.MOCK && process.env.MOCK === 'true')
+  mock: !!(process.env.MOCK && process.env.MOCK === 'true'),
+  appRoles: {
+    admin: process.env.APP_ROLE_ADMIN_NAME ?? 'dennarollenhardualdri',
+    priveleged: process.env.APP_ROLE_PRIVELEGED_NAME ?? 'ikkedennerolleheller'
+  }
 }
