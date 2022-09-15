@@ -30,7 +30,7 @@ module.exports = async function (context, req) {
     if (filteredDocs.length === 0) {
       return { status: 404, body: `No users found with "${query.prop}: "${query.value}"` }
     }
-    return { status: 200, body: filteredDocs }
+    return { status: 200, body: filteredDocs[0] }
   } catch (error) {
     return { status: 500, body: error.message }
   }
