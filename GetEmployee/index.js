@@ -15,9 +15,35 @@ const determineParam = (id) => {
   }
 }
 
+let projection = {
+  userPrincipalName: 1,
+  fornavn: 1,
+  etternavn: 1,
+  officeLocation: 1,
+  'aktiveArbeidsforhold.hovedstilling': 1,
+  'aktiveArbeidsforhold.stillingstittel': 1,
+  'aktiveArbeidsforhold.arbeidssted.navn': 1,
+  'azureAd.manager.displayName': 1,
+  'azureAd.manager.userPrincipalName': 1,
+} 
+
 module.exports = async function (context, req) {
   // Verify that the users have access to this endpoint
-  if (!verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) return { status: 401, body: 'You are not authorized to access this resource' }
+  if (verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) {
+    projection = {
+      ...projection,
+      samAccountName: 1,
+      mobilePhone: 1,
+      privatEpostadresse: 1,
+      bostedsadresse: 1,
+      kjonn: 1,
+      ansattnummer: 1,
+      kontaktEpostadresse: 1,
+      arbeidsforhold: 1,
+      personalressurskategori: 1,
+      harAktivtArbeidsforhold: 1
+    }
+  }
 
   if (!req.params.id) return { status: 400, body: 'Please specify query param {id} with an ssn, upn, or samAccountName' }
   const query = determineParam(req.params.id)
@@ -26,7 +52,7 @@ module.exports = async function (context, req) {
   const db = await mongo()
   const collection = db.collection(mongoDB.employeeCollection)
   try {
-    const filteredDocs = await collection.find({ [query.prop]: query.value }).toArray()
+    const filteredDocs = await collection.find({ [query.prop]: query.value }).project(projection).toArray()
     if (filteredDocs.length === 0) {
       return { status: 404, body: `No users found with "${query.prop}: "${query.value}"` }
     }
