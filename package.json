@@ -8,16 +8,16 @@
   },
   "author": "jorgtho",
   "dependencies": {
-    "@azure/msal-node": "^1.12.1",
-    "@vtfk/logger": "^4.3.2",
-    "axios": "^0.27.2",
-    "client-oauth2": "^4.3.3",
-    "jsonwebtoken": "^8.5.1",
+    "@azure/msal-node": "1.12.1",
+    "@vtfk/logger": "4.3.2",
+    "axios": "0.27.2",
+    "client-oauth2": "4.3.3",
+    "jsonwebtoken": "8.5.1",
     "mongodb": "4.9.1",
-    "node-cache": "^5.1.2"
+    "node-cache": "5.1.2"
   },
   "devDependencies": {
-    "dotenv": "^16.0.2",
+    "dotenv": "16.0.2",
     "jest": "27.5.1",
     "standard": "16.0.4"
   },
