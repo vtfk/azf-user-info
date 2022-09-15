@@ -52,6 +52,7 @@ module.exports = async function (context, req) {
       kontaktEpostadresse: 1,
       arbeidsforhold: 1,
       personalressurskategori: 1,
+      aktiveArbeidsforhold: 1,
       harAktivtArbeidsforhold: 1
     }
     logger('info', [`roles validated - will use expanded projection data`, projection])

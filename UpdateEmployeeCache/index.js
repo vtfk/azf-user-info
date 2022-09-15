@@ -6,7 +6,7 @@ module.exports = async function (context, req) {
   try {
     const employeeData = await bakeEmployees()
 
-    const res = switchMainCollection(mongoDB.employeeCollection, employeeData)
+    const res = await switchMainCollection(mongoDB.employeeCollection, employeeData)
 
     return { status: 200, body: res }
   } catch (error) {
