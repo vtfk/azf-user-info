@@ -28,10 +28,10 @@ describe('bakeEmployeeData runs nice-nice', () => {
   test('codes are expanded correctly', () => {
     const guri = empData.find(emp => emp.userPrincipalName === 'guri@vtfk.no')
     expect(guri.personalressurskategori.navn).toBe('Utedo')
-    expect(guri.arbeidsforhold[0].stillingskode.navn).toBe('Byggvraker')
+    expect(guri.aktiveArbeidsforhold[0].stillingskode.navn).toBe('Byggvraker')
   })
   test('arbeidssted is added correcty', () => {
     const guri = empData.find(emp => emp.userPrincipalName === 'guri@vtfk.no')
-    expect(guri.arbeidsforhold[0].arbeidssted.navn).toBe('Gul videregående skole')
+    expect(guri.aktiveArbeidsforhold[0].arbeidssted.navn).toBe('Gul videregående skole')
   })
 })
