@@ -2,7 +2,6 @@ const mongo = require('../lib/mongo')
 const { mongoDB } = require('../config')
 
 module.exports = async function (context, req) {
-
   const db = await mongo()
   const collection = db.collection(mongoDB.orgCollection)
   const projection = {
@@ -19,7 +18,7 @@ module.exports = async function (context, req) {
     'arbeidsforhold.stillingsnummer': 1,
     'arbeidsforhold.stillingstittel': 1,
     'arbeidsforhold.ansettelsesprosent': 1,
-    'arbeidsforhold.personalressurskategori': 1,
+    'arbeidsforhold.personalressurskategori': 1
   }
 
   try {

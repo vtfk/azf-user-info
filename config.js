@@ -24,7 +24,8 @@ module.exports = {
     database: process.env.MONGO_DB_DATABASE ?? 'tulliballa',
     employeeCollection: process.env.MONGO_DB_EMPLOYEE_COLLECTION ?? 'jauddaaa',
     studentCollection: process.env.MONGO_DB_STUDENT_COLLECTION ?? 'jauddaaa',
-    orgCollection: process.env.MONGO_DB_ORG_COLLECTION ?? 'jauddaaa'
+    orgCollection: process.env.MONGO_DB_ORG_COLLECTION ?? 'jauddaaa',
+    competenceCollection: process.env.MONGO_DB_COMPETENCE_COLLECTION ?? 'jauddaaa'
   },
   deleteAfterInactiveDays: process.env.DELETE_AFTER_INACTIVE_DAYS ?? 90,
   mock: !!(process.env.MOCK && process.env.MOCK === 'true'),
