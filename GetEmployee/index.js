@@ -65,7 +65,7 @@ module.exports = async function (context, req) {
       res.competenceData = null
     } else {
       logger('info', [`Found competence data for user ${query.prop}: "${query.value}"`])
-      res.competenceData = competenceData
+      res.competenceData = competenceData[0]
     }
   } catch (error) {
     logger('error', error.message)
