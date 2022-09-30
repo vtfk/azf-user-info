@@ -2,7 +2,7 @@ const mongo = require('../lib/mongo')
 const { mongoDB, appRoles } = require('../config')
 const { verifyRoles } = require('../lib/verifyTokenClaims')
 const { logger, logConfig } = require('@vtfk/logger')
-const { baseProjection, expandedProjection, pipelainen } = require('../lib/employee/employeeProjections')
+const { baseProjection, expandedProjection } = require('../lib/employee/employeeProjections')
 
 const determineParam = (id) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
