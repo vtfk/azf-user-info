@@ -35,7 +35,7 @@ module.exports = async function (context, req) {
     collection = db.collection(mongoDB.competenceCollection)
     const competenceData = await collection.find({ fodselsnummer: res.fodselsnummer }).project({ _id: 0 }).toArray()
     if (competenceData.length === 0) {
-      res.competenceData = null
+      res.competenceData = {}
     } else {
       logger('info', [`Found competence data for user "${upn}"`])
       res.competenceData = competenceData[0]
