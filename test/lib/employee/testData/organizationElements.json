@@ -6,7 +6,8 @@
           "navn": "Gul videregående skole",
           "organisasjonsnummer": "3748973897423",
           "organisasjonsKode": "00000-01",
-          "leder": "111"
+          "leder": "111",
+          "overordnet": "01"
         },
         {
           "organisasjonsId": "02",
@@ -14,7 +15,8 @@
           "navn": "Sektor for udugelighet",
           "organisasjonsnummer": "47389",
           "organisasjonsKode": "00000-02",
-          "leder": "222"
+          "leder": "222",
+          "overordnet": "01"
         },
         {
           "organisasjonsId": "03",
@@ -22,7 +24,8 @@
           "navn": "Team tull og ball",
           "organisasjonsnummer": "324789723489",
           "organisasjonsKode": "00000-03",
-          "leder": "333"
+          "leder": "333",
+          "overordnet": "02"
         }
       ]
 }
