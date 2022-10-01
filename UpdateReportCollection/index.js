@@ -66,8 +66,8 @@ module.exports = async function (context, myTimer) {
 
     logger('info', ['Updating report collection with new data'])
     const updateResult = await switchMainCollection(mongoDB.reportCollection, res)
-    logger('info', ['Successfully updated report collection', updateResult])
+    await logger('info', ['Successfully updated report collection', updateResult])
   } catch (error) {
-    logger('error', error.message)
+    await logger('error', error.message)
   }
 }
