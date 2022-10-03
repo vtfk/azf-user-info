@@ -3,4 +3,4 @@ Api for getting user info from cached users
 
 EmployeeCache må kjøre FØR orgCache
 
-Halla
+Halla på deg!
