@@ -1,7 +1,7 @@
 const mongo = require('../lib/mongo')
 const { mongoDB } = require('../config')
 const { logger, logConfig } = require('@vtfk/logger')
-const switchMainCollection = require('../lib/switchMainCollection')
+const { save } = require('@vtfk/azure-blob-client')
 
 const employeeProjection = {
   fodselsnummer: 1,
@@ -64,9 +64,9 @@ module.exports = async function (context, myTimer) {
     })
     logger('info', ['Successfully merged employeeData with competenceData'])
 
-    logger('info', ['Updating report collection with new data'])
-    const updateResult = await switchMainCollection(mongoDB.reportCollection, res)
-    await logger('info', ['Successfully updated report collection', updateResult])
+    logger('info', ['Updating report blob storage with new data'])
+    const createResult = await save('reportData.json', JSON.stringify(res, null, 2))
+    await logger('info', ['Successfully created new report data blob', createResult])
   } catch (error) {
     await logger('error', error.message)
   }
