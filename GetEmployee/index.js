@@ -8,6 +8,8 @@ const determineParam = (id) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
   if (id.length === 11 && !isNaN(id)) { // SSN
     return { prop: 'fodselsnummer', value: id }
+  } else if (id.length < 10 && !isNaN(id)) {
+    return { prop: 'ansattnummer', value: id }
   } else if (emailRegex.test(id)) {
     return { prop: 'userPrincipalName', value: id }
   } else if (typeof id === 'string' && id.length < 50) {
