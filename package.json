@@ -8,7 +8,7 @@
   },
   "author": "jorgtho",
   "dependencies": {
-    "@azure/msal-node": "1.12.1",
+    "@azure/msal-node": "1.14.0",
     "@vtfk/azure-blob-client": "^0.1.0",
     "@vtfk/logger": "4.3.2",
     "axios": "0.27.2",
