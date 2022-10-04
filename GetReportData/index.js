@@ -22,7 +22,7 @@ module.exports = async function (context, req) {
   }
 
   logger('info', ['running query for report data'])
-  const db = await mongo()
+  const db = mongo()
   const collection = db.collection(mongoDB.reportCollection)
   try {
     const reportData = await collection.find({}).toArray()

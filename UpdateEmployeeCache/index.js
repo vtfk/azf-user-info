@@ -10,7 +10,7 @@ module.exports = async function (context, req) {
 
     const res = await switchMainCollection(mongoDB.employeeCollection, employeeData)
     /*
-    const db = await mongo()
+    const db = mongo()
     const collection = db.collection(mongoDB.employeeCollection)
     const indexRes = await collection.createIndex( { fornavn: "text", etternavn: "text" } )
     */

@@ -5,7 +5,7 @@ const { mongoDB } = require('../config')
 module.exports = async function (context, req) {
   try {
     const studentData = await bakeStudents()
-    const db = await mongo()
+    const db = mongo()
     const collection = db.collection(mongoDB.studentCollection)
     await collection.drop()
     const insertResult = await collection.insertMany(studentData)

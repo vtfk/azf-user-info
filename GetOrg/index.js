@@ -2,7 +2,7 @@ const mongo = require('../lib/mongo')
 const { mongoDB } = require('../config')
 
 module.exports = async function (context, req) {
-  const db = await mongo()
+  const db = mongo()
   const collection = db.collection(mongoDB.orgCollection)
   const projection = {
     _id: 0,

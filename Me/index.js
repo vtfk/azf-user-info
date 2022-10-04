@@ -19,7 +19,7 @@ module.exports = async function (context, req) {
   const { upn } = jwt.decode(req.headers.authorization.replace('Bearer ', ''))
   if (!upn) return { status: 401, body: 'You do not have UPN - whaaaat?' }
 
-  const db = await mongo()
+  const db = mongo()
   let collection = db.collection(mongoDB.employeeCollection)
   let res = {}
   try {
