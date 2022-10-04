@@ -11,7 +11,7 @@ module.exports = async function (context, req) {
 
   if (typeof req.body !== 'object') return { status: 400, body: 'That is not an object body' }
   if (!req.body.fodselsnummer) return { status: 400, body: 'Missing required parameter "fodselsnummer"' }
-  const db = await mongo()
+  const db = mongo()
   const collection = db.collection(mongoDB.competenceCollection)
   try {
     const upsertRes = await collection.replaceOne({ fodselsnummer: req.body.fodselsnummer, userPrincipalName: upn }, { ...req.body, userPrincipalName: upn }, { upsert: true })

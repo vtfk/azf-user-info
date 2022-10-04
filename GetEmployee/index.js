@@ -53,11 +53,11 @@ module.exports = async function (context, req) {
   if (searchProjection) projection = searchProjection
 
   logger('info', [`running query for`, query])
-  const db = await mongo()
+  const db = mongo()
   let collection = db.collection(mongoDB.employeeCollection)
   let res = {}
   try {
-    const employeeData = await collection.find(query).project(projection).toArray()
+    const employeeData = await collection.find(query).limit(10).project(projection).toArray()
     if (employeeData.length === 0) {
       logger('info', ["No users found with", query])
       return { status: 404, body: `No users found with "${JSON.stringify(query)}"` }

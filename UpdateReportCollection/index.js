@@ -36,7 +36,7 @@ module.exports = async function (context, myTimer) {
   })
   logger('info', ['new timed run - Here we go!'])
 
-  const db = await mongo()
+  const db = mongo()
   let collection = db.collection(mongoDB.employeeCollection)
   try {
     // EmployeeData
