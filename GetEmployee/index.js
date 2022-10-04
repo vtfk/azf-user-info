@@ -2,20 +2,21 @@ const mongo = require('../lib/mongo')
 const { mongoDB, appRoles } = require('../config')
 const { verifyRoles } = require('../lib/verifyTokenClaims')
 const { logger, logConfig } = require('@vtfk/logger')
-const { baseProjection, expandedProjection } = require('../lib/employee/employeeProjections')
+const { baseProjection, expandedProjection, nameSearchProjection } = require('../lib/employee/employeeProjections')
 
 const determineParam = (id) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
+  const samAccountRegex = new RegExp("[a-z]{2,3}[0-9]{4,5}")
   if (id.length === 11 && !isNaN(id)) { // SSN
-    return { prop: 'fodselsnummer', value: id }
+    return { query:  { 'fodselsnummer': id, harAktivtArbeidsforhold: true } }
   } else if (id.length < 10 && !isNaN(id)) {
-    return { prop: 'ansattnummer', value: id }
+    return { query: { 'ansattnummer': id, harAktivtArbeidsforhold: true } }
   } else if (emailRegex.test(id)) {
-    return { prop: 'userPrincipalName', value: id }
-  } else if (typeof id === 'string' && id.length < 50) {
-    return { prop: 'samAccountName', value: id }
+    return { query: { 'userPrincipalName': id, harAktivtArbeidsforhold: true } }
+  } else if (samAccountRegex.test(id)) {
+    return { query: { 'samAccountName': id, harAktivtArbeidsforhold: true } }
   } else {
-    return undefined
+    return { query: { navn: {'$regex' : id, '$options' : 'i'}, harAktivtArbeidsforhold: true }, searchProjection: nameSearchProjection }
   }
 }
 
@@ -32,41 +33,58 @@ module.exports = async function (context, req) {
   // Base projection
   let projection = baseProjection
   // Verify that the users have access to this endpoint
-  if (verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) {
+  const priveleged = verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])
+  if (priveleged) {
     // Expanded projection
     projection = expandedProjection
-    logger('info', ['roles validated - will use expanded projection data', projection])
+    logger('info', ['roles validated - will use expanded projection data'])
   } else {
-    logger('info', ['roles not present - will use base projection data', projection])
+    logger('info', ['roles not present - will use base projection data'])
   }
 
-  if (!req.params.id) return { status: 400, body: 'Please specify query param {id} with an ssn, upn, or samAccountName' }
-  const query = determineParam(req.params.id)
-  if (!query) return { status: 400, body: 'Please specify VALID query param {id} with an ssn, upn, or samAccountName' }
+  if (!req.params.id) return { status: 400, body: 'Please specify query param {id} with an ssn, upn, samAccountName, ansattnummer, or name' }
+  const { query, searchProjection } = determineParam(req.params.id)
+  if (!query) return { status: 400, body: 'Please specify VALID query param {id} with an ssn, upn, samAccountName, ansattnummer, or name' }
 
-  logger('info', [`running query for ${query.prop}: "${query.value}"`])
+  // Check if can use ssn as query
+  if (priveleged && query.fodselsnummer) return { status: 401, body: 'You are not authorized to use ssn as query' }
+
+  // Override projection if it the query is a partial search query
+  if (searchProjection) projection = searchProjection
+
+  logger('info', [`running query for`, query])
   const db = await mongo()
   let collection = db.collection(mongoDB.employeeCollection)
   let res = {}
   try {
-    const employeeData = await collection.find({ [query.prop]: query.value }).project(projection).toArray()
+    const employeeData = await collection.find(query).project(projection).toArray()
     if (employeeData.length === 0) {
-      logger('info', [`No users found with "${query.prop}: "${query.value}"`])
-      return { status: 404, body: `No users found with ${query.prop}: "${query.value}"` }
+      logger('info', ["No users found with", query])
+      return { status: 404, body: `No users found with "${JSON.stringify(query)}"` }
     }
-    logger('info', [`Found employee data for user ${query.prop}: "${query.value}"`])
-    res = { ...employeeData[0] }
+    logger('info', [`Found employee data for user`, query])
+    res = employeeData
   } catch (error) {
     logger('error', error.message)
     return { status: 500, body: error.message }
   }
+  if (searchProjection) {
+    logger('info', [`Using searchProjection`, query, 'do not need competence data'])
+    return { status: 200, body: res }
+  } else if (!priveleged) {
+    logger('info', [`Not privileged`, query, 'do not need competence data'])
+    return { status: 200, body: { ...res[0] } }
+  }
+
+  // If privileged and specific query we expand with competence data
   try {
+    res = { ...res[0] }
     collection = db.collection(mongoDB.competenceCollection)
     const competenceData = await collection.find({ fodselsnummer: res.fodselsnummer }).project({ _id: 0 }).toArray()
     if (competenceData.length === 0) {
       res.competenceData = null
     } else {
-      logger('info', [`Found competence data for user ${query.prop}: "${query.value}"`])
+      logger('info', [`Found competence data for user`, query])
       res.competenceData = competenceData[0]
     }
   } catch (error) {
