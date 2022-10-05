@@ -47,7 +47,7 @@ module.exports = async function (context, req) {
   if (!query) return { status: 400, body: 'Please specify VALID query param {id} with an ssn, upn, samAccountName, ansattnummer, or name' }
 
   // Check if can use ssn as query
-  if (priveleged && query.fodselsnummer) return { status: 401, body: 'You are not authorized to use ssn as query' }
+  if (!priveleged && query.fodselsnummer) return { status: 401, body: 'You are not authorized to use ssn as query' }
 
   // Override projection if it the query is a partial search query
   if (searchProjection) projection = searchProjection
