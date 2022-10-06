@@ -73,7 +73,7 @@ module.exports = async function (context, req) {
     return { status: 200, body: res }
   } else if (!priveleged) {
     logger('info', [`Not privileged`, query, 'do not need competence data'])
-    return { status: 200, body: { ...res[0] } }
+    return { status: 200, body: res }
   }
 
   // If privileged and specific query we expand with competence data
@@ -91,5 +91,5 @@ module.exports = async function (context, req) {
     logger('error', error.message)
     return { status: 500, body: error.message }
   }
-  return { status: 200, body: res }
+  return { status: 200, body: [res] }
 }
