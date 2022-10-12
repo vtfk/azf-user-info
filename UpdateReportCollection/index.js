@@ -1,5 +1,5 @@
 const mongo = require('../lib/mongo')
-const { mongoDB } = require('../config')
+const { mongoDB, mock } = require('../config')
 const { logger, logConfig } = require('@vtfk/logger')
 const { save } = require('@vtfk/azure-blob-client')
 
@@ -19,6 +19,28 @@ const employeeProjection = {
 const competenceProjection = {
   fodselsnummer: 1,
   education: 1
+}
+
+
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+}
+
+const mockCompetence = () => {
+  const randomDegree = getRandomInt(0,4)
+  const randomSubject = getRandomInt(0,4)
+  const degrees = ['master', 'bachelor', 'videregående skole', 'fagbrev']
+  const subjects = ['Vin', 'øl', 'Matte', 'Norsk']
+  return {
+    education: [
+      {
+      degree: degrees[randomDegree],
+      subject: subjects[randomSubject]
+      }
+    ]
+  }
 }
 
 const defaultCompetence = {
@@ -51,9 +73,13 @@ module.exports = async function (context, myTimer) {
     logger('info', ['Successfully fetched competenceData'])
 
     logger('info', ['Merging employeeData with competenceData...'])
+    if (mock) logger('info', ['Mock is true - generating mock-competence for users that have not set competence yet'])
     const filtered = employeeData.filter(emp => emp.aktiveArbeidsforhold.find(forhold => forhold.lonnsprosent > 0) !== undefined)
     const res = filtered.map(emp => {
-      const comp = competenceData.find(c => c.fodselsnummer === emp.fodselsnummer)
+      let comp = competenceData.find(c => c.fodselsnummer === emp.fodselsnummer)
+      if (!comp && mock) {
+        comp = mockCompetence()
+      }
       const merged = {
         ...emp,
         competenceData: comp ?? defaultCompetence
@@ -62,9 +88,9 @@ module.exports = async function (context, myTimer) {
       delete merged.competenceData.fodselsnummer
       return merged
     })
-    logger('info', ['Successfully merged employeeData with competenceData'])
+    await logger('info', ['Successfully merged employeeData with competenceData'])
 
-    logger('info', ['Updating report blob storage with new data'])
+    await logger('info', ['Updating report blob storage with new data'])
     const createResult = await save('reportData.json', JSON.stringify(res, null, 2))
     await logger('info', ['Successfully created new report data blob', createResult])
   } catch (error) {
