@@ -31,15 +31,52 @@ const getRandomInt = (min, max) => {
 const mockCompetence = () => {
   const randomDegree = getRandomInt(0,4)
   const randomSubject = getRandomInt(0,4)
+  const randomTask = getRandomInt(0,4)
+  const randomPosition = getRandomInt(0,4)
+  const randomSoloRole = getRandomInt(0,2)
+  const randomPreferredCounty = getRandomInt(0,3)
   const degrees = ['master', 'bachelor', 'videregående skole', 'fagbrev']
   const subjects = ['Vin', 'øl', 'Matte', 'Norsk']
+  const tasks = [['Hoppe tau', 'Lage mat', 'Kjøre bil'], ['Klage', 'syte', 'Drikke kaffe'], ['Synge litt', 'Danse litt', 'Sette seg litt ned'], ['Power bi problemer', 'Lage for mye statistikk', 'UNne seg noe godt']]
+  const positions = ['Avisbud', 'Hundefører', 'Løypemåker', 'Fugletitter']
+  const soloRoles = ['Ja', 'Nei']
+  const preferredCounties = ['Vet ikke', 'Telemark fylkeskommune', 'Vestfold fylkeskommune']
   return {
     education: [
       {
-      degree: degrees[randomDegree],
-      subject: subjects[randomSubject]
+        degree: degrees[randomDegree],
+        subject: subjects[randomSubject],
+        fromYear: 2019,
+        toYear: 2022,
+        "fromMonth": "Januar",
+        "toMonth": "Februar",
+        "school": "Livets harde skole"
       }
-    ]
+    ],
+    tasks: tasks[randomTask],
+    workExperience: [
+      {
+        "fromYear": 2019,
+        "toYear": 2022,
+        "fromMonth": "Januar",
+        "toMonth": "Februar",
+        "tasks": [
+            "Løpe",
+            "Sykle",
+            "Skape overskrifter i TA",
+            "",
+            ""
+        ],
+        "position": positions[randomPosition],
+        "sector": "Privat",
+        "employer": "Arbeidsgiver AS"
+      }
+    ],
+    other: {
+      "soloRole": soloRoles[randomSoloRole],
+      "soloRoleDescription": "Lage solobrus, og lage mat til hunder på gata",
+      "preferredCounty": preferredCounties[randomPreferredCounty]
+    }
   }
 }
 
