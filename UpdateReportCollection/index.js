@@ -114,7 +114,7 @@ module.exports = async function (context, myTimer) {
     const filtered = employeeData.filter(emp => emp.aktiveArbeidsforhold.find(forhold => forhold.lonnsprosent > 0) !== undefined)
     const res = filtered.map(emp => {
       let comp = competenceData.find(c => c.fodselsnummer === emp.fodselsnummer)
-      if (!comp && mock) {
+      if (mock) {
         comp = mockCompetence()
       }
       const merged = {
