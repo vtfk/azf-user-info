@@ -13,6 +13,8 @@ module.exports = async function (context, req) {
   })
   logger('info', ['new request - validating roles'])
 
+  return { status: 500, body: 'Endpoint not in use anymore, remember to delete it, jorgen and robin' }
+
   // Verify that the users have access to this endpoint
   if (verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) {
     logger('info', ['roles validated'])

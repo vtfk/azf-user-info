@@ -33,5 +33,6 @@ module.exports = {
   appRoles: {
     admin: process.env.APP_ROLE_ADMIN_NAME ?? 'dennarollenhardualdri',
     priveleged: process.env.APP_ROLE_PRIVELEGED_NAME ?? 'ikkedennerolleheller'
-  }
+  },
+  validUpnSuffix: process.env.VALID_UPN_SUFFIX || '@blubblibb.no'
 }

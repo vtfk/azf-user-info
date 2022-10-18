@@ -1,6 +1,6 @@
 const mongo = require('../lib/mongo')
 const { mongoDB, appRoles } = require('../config')
-const { verifyRoles } = require('../lib/verifyTokenClaims')
+const { verifyRoles, verifyUpn } = require('../lib/verifyTokenClaims')
 const jwt = require('jsonwebtoken')
 const { logger, logConfig } = require('@vtfk/logger')
 const { expandedProjection } = require('../lib/employee/employeeProjections')
@@ -15,6 +15,10 @@ module.exports = async function (context, req) {
   })
   // Verify that the users have access to this endpoint
   if (!req.headers.authorization) return { status: 401, body: 'You are not authorized to access this resource' }
+  
+  const verUpn = verifyUpn(req.headers.authorization)
+  if (!verUpn) return { status: 401, body: 'You are not authorized to view this resource, upn suffix is not authorized' }
+
   if (typeof req.headers.authorization !== 'string') return { status: 401, body: 'Access token is not valid' }
   const { upn } = jwt.decode(req.headers.authorization.replace('Bearer ', ''))
   if (!upn) return { status: 401, body: 'You do not have UPN - whaaaat?' }

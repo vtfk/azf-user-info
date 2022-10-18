@@ -1,6 +1,6 @@
 const mongo = require('../lib/mongo')
-const { mongoDB, appRoles } = require('../config')
-const { verifyRoles } = require('../lib/verifyTokenClaims')
+const { mongoDB, appRoles, validUpnSuffix } = require('../config')
+const { verifyRoles, verifyUpn } = require('../lib/verifyTokenClaims')
 const { logger, logConfig } = require('@vtfk/logger')
 const { baseProjection, expandedProjection, nameSearchProjection } = require('../lib/employee/employeeProjections')
 
@@ -28,7 +28,10 @@ module.exports = async function (context, req) {
       excludeInvocationId: true
     }
   })
-  logger('info', ['new request - validating roles'])
+  logger('info', ['new request - validating roles and upn'])
+  // Verify upn
+  const verUpn = verifyUpn(req.headers.authorization)
+  if (!verUpn) return { status: 401, body: 'You are not authorized to view this resource, upn suffix is not authorized' }
 
   // Base projection
   let projection = baseProjection
