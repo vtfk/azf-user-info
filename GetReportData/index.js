@@ -1,6 +1,6 @@
 const mongo = require('../lib/mongo')
 const { mongoDB, appRoles } = require('../config')
-const { verifyRoles } = require('../lib/verifyTokenClaims')
+const { verifyRoles } = require('../lib/verifyToken')
 const { logger, logConfig } = require('@vtfk/logger')
 
 module.exports = async function (context, req) {
@@ -16,7 +16,7 @@ module.exports = async function (context, req) {
   return { status: 500, body: 'Endpoint not in use anymore, remember to delete it, jorgen and robin' }
 
   // Verify that the users have access to this endpoint
-  if (verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) {
+  if (verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.privileged])) {
     logger('info', ['roles validated'])
   } else {
     logger('info', ['roles not present - not authorized'])

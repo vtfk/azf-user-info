@@ -1,6 +1,6 @@
 const mongo = require('../lib/mongo')
 const { mongoDB, appRoles } = require('../config')
-const { verifyRoles, verifyUpn } = require('../lib/verifyTokenClaims')
+const { verifyRoles, verifyUpn } = require('../lib/verifyToken')
 
 const query = { userPrincipalName: { $ne: null }, harAktivtArbeidsforhold: true }
 const projection = {
@@ -20,7 +20,9 @@ module.exports = async function (context, req) {
   // Verify that the users have access to this endpoint
   const verUpn = verifyUpn(req.headers.authorization)
   if (!verUpn) return { status: 401, body: 'You are not authorized to view this resource, upn suffix is not authorized' }
-  if (!verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.priveleged])) return { status: 401, body: 'You are not authorized to access this resource' }
+
+  
+  if (!verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.privileged])) return { status: 401, body: 'You are not authorized to access this resource' }
 
   const db = mongo()
   const collection = db.collection(mongoDB.employeeCollection)

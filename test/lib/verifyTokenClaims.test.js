@@ -1,4 +1,4 @@
-const { verifyTokenClaims, verifyRoles } = require('../../lib/verifyTokenClaims')
+const { verifyTokenClaims, verifyRoles } = require('../../lib/verifyToken')
 const jwt = require('jsonwebtoken')
 
 const token1Data = {

@@ -1,6 +1,6 @@
 const mongo = require('../lib/mongo')
 const { mongoDB } = require('../config')
-const { verifyUpn } = require('../lib/verifyTokenClaims')
+const { verifyUpn } = require('../lib/verifyToken')
 
 module.exports = async function (context, req) {
   if (!req.headers.authorization) return { status: 401, body: 'Missing access token' }

@@ -1,9 +1,9 @@
 const mongo = require('../lib/mongo')
 const { mongoDB, appRoles } = require('../config')
-const { verifyRoles, verifyUpn } = require('../lib/verifyTokenClaims')
+const { verifyRoles, verifyUpn } = require('../lib/verifyToken')
 const jwt = require('jsonwebtoken')
 const { logger, logConfig } = require('@vtfk/logger')
-const { expandedProjection } = require('../lib/employee/employeeProjections')
+const { employeeProjection } = require('../lib/employee/employeeProjections')
 
 module.exports = async function (context, req) {
   logConfig({
@@ -27,7 +27,7 @@ module.exports = async function (context, req) {
   let collection = db.collection(mongoDB.employeeCollection)
   let res = {}
   try {
-    const employeeData = await collection.find({ userPrincipalName: upn }).project(expandedProjection).toArray()
+    const employeeData = await collection.find({ userPrincipalName: upn }).project(employeeProjection).toArray()
     if (employeeData.length === 0) {
       return { status: 404, body: `No users found with "userPrincipalName": "${upn}"` }
     }

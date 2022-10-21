@@ -1,7 +1,7 @@
 const mongo = require('../lib/mongo')
 const { mongoDB } = require('../config')
 const jwt = require('jsonwebtoken')
-const { verifyUpn } = require('../lib/verifyTokenClaims')
+const { verifyUpn } = require('../lib/verifyToken')
 
 module.exports = async function (context, req) {
   // Verify that the users have access to this endpoint
