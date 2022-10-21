@@ -75,8 +75,8 @@ module.exports = async function (context, req) {
     }
     else {
       logger('info', [`Not privileged`, query, 'do not need competence data'])
-      res = filterEmployeeData(res)
-      return { status: 200, body: res }
+      res = filterEmployeeData(res[0])
+      return { status: 200, body: [res] }
     }
   }
 
