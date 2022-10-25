@@ -1,4 +1,4 @@
-const { verifyToken, isLeader } = require('../../lib/verifyToken')
+const { verifyToken, verifyUpn, isLeader } = require('../../lib/verifyToken')
 const { validUpnSuffix } = require('../../config')
 const jwt = require('jsonwebtoken')
 
@@ -52,6 +52,33 @@ describe('Check that verifyToken returns as expected, when ', () => {
     const ver = verifyToken()
     expect(ver.verified).toBe(false)
     expect(ver.roles.length).toBe(0)
+  })
+})
+
+// verify Upn
+const validUpnTokenData = {
+  upn: `enellerannen${validUpnSuffix}`
+}
+
+const invalidUpnTokenData = {
+  upn: `enellerannen@balla.no`
+}
+
+const validUpnToken = jwt.sign(validUpnTokenData, 'hva som helstssss')
+const invalidUpnToken = jwt.sign(invalidUpnTokenData, 'hva som helstssss')
+
+describe('Check that verifyUpn returns as expected, when', () => {
+  test('valid upn suffix is present', () => {
+    const ver = verifyUpn(validUpnToken)
+    expect(ver).toBeTruthy()
+  })
+  test('invalid upn suffix is present', () => {
+    const ver = verifyUpn(invalidUpnToken)
+    expect(ver).toBeFalsy()
+  })
+  test('upn suffix is NOT present', () => {
+    const ver = verifyUpn()
+    expect(ver).toBeFalsy()
   })
 })
 
