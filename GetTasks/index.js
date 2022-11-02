@@ -37,7 +37,7 @@ module.exports = async function (context, req) {
     const positionTasks = await (collection.find({ "positionTasks.positionParent": param }).project(taskProjection).toArray())
     const res = []
     for (const ele of positionTasks) {
-        for (const positionTask of ele.positionTasks) {
+        for (const positionTask of ele.positionTasks.filter(t => t.positionParent === param)) {
             for (const task of positionTask.tasks) {
                 if (!res.find(ele => ele.value === task)) {
                     res.push(
