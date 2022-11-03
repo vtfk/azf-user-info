@@ -12,6 +12,7 @@ const orgProjection = {
   organisasjonsnummer: 1,
   leder: 1,
   overordnet: 1,
+  'arbeidsforhold.systemId': 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
   'arbeidsforhold.ansettelsesprosent': 1,
@@ -22,6 +23,11 @@ const orgProjection = {
   'arbeidsforhold.ansettelsesprosent': 1,
   'arbeidsforhold.personalressurskategori': 1,
   'arbeidsforhold.officeLocation': 1
+}
+
+const taskProjection = {
+  _id: 0,
+  positionTasks: 1
 }
 
 const determineParam = (param) => {
@@ -53,12 +59,31 @@ module.exports = async function (context, req) {
   const { query, searchProjection, type } = determineParam(req.params.param)
 
   const db = mongo()
-  const collection = db.collection(mongoDB.orgCollection)
+  let collection = db.collection(mongoDB.orgCollection)
 
   try {
     const org = await collection.find(query).project(searchProjection).toArray()
-    // const repacked = repack(persons)
-    return { status: 200, body: org }
+    const tasks = "rer"
+    const positionIds = org.map(unit => {
+      return unit.arbeidsforhold.map(forhold => forhold.systemId)
+    })
+
+    const taskQuery = { "positionTasks.positionId": { "$in": positionIds.flat() } }
+    collection = db.collection(mongoDB.competenceCollection)
+    const posTasks = await collection.find(taskQuery).project(taskProjection).toArray()
+    const orgRes = org.map(unit => {
+      return {
+        ...unit,
+        arbeidsforhold: unit.arbeidsforhold.map(forhold => {
+          return {
+            ...forhold,
+            tasks: posTasks.find(posTask => posTask.positionTasks.find(pos => pos.positionId === forhold.systemId))?.positionTasks.find(task => task.positionId === forhold.systemId)?.tasks ?? [] 
+          }
+        })
+      }
+    })
+
+    return { status: 200, body: orgRes }
   } catch (error) {
     return { status: 500, body: error.message }
   }
