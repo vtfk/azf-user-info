@@ -51,13 +51,13 @@ const mockCompetence = () => {
   const randomTask = getRandomInt(0,4)
   const randomPosition = getRandomInt(0,4)
   const randomSoloRole = getRandomInt(0,2)
-  const randomPreferredCounty = getRandomInt(0,3)
+  const randomPreferredCounty = getRandomInt(0,4)
   const degrees = ['master', 'bachelor', 'videregående skole', 'fagbrev']
   const subjects = ['Vin', 'øl', 'Matte', 'Norsk']
   const tasks = [['Hoppe tau', 'Lage mat', 'Kjøre bil'], ['Klage', 'syte', 'Drikke kaffe'], ['Synge litt', 'Danse litt', 'Sette seg litt ned'], ['Power bi problemer', 'Lage for mye statistikk', 'UNne seg noe godt']]
   const positions = ['Avisbud', 'Hundefører', 'Løypemåker', 'Fugletitter']
   const soloRoles = ['Ja', 'Nei']
-  const preferredCounties = ['Vet ikke', 'Telemark fylkeskommune', 'Vestfold fylkeskommune']
+  const preferredCounties = ['Vet ikke', 'Telemark fylkeskommune', 'Vestfold fylkeskommune', 'Begge alternativene er like gode for meg']
   return {
     education: [
       {
@@ -129,7 +129,7 @@ module.exports = async function (context, myTimer) {
     logger('info', ['Merging employeeData with competenceData...'])
     if (mock) logger('info', ['Mock is true - generating mock-competence for users that have not set competence yet'])
     //const filtered = employeeData.filter(emp => emp.aktiveArbeidsforhold.find(forhold => forhold.lonnsprosent > 0) !== undefined)
-    const filtered = employeeData.map(raw => mapReportData(raw))
+    const filtered = employeeData.map(raw => mapReportData(raw)).filter(employee => ['Fylkeshuset i Tønsberg', 'Fylkeshuset T18 Skien', 'Fylkesbakken Skien', 'Fylkessenter Seljord'].includes(employee.kontorsted))
     const res = filtered.map(emp => {
       let comp = competenceData.find(c => c.fodselsnummer === emp.fodselsnummer)
       if (mock) {
