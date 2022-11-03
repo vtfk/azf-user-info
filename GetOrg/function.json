@@ -4,6 +4,7 @@
       "authLevel": "function",
       "type": "httpTrigger",
       "direction": "in",
+      "route": "GetOrg/{param}",
       "name": "req",
       "methods": [
         "get"
