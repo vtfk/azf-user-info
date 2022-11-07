@@ -45,7 +45,7 @@ const taskProjection = {
 
 const determineParam = (param) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
-  if (!isNaN(param)) { // orgid
+  if (!isNaN(param) || param === 'hoved') { // orgid
     return { query:  { 'organisasjonsId': param }, searchProjection: orgProjection, type: 'unique' }
   } else if (emailRegex.test(param)) {
     return { query: { 'arbeidsforhold.userPrincipalName': param }, searchProjection: orgProjection, type: 'unique' }
