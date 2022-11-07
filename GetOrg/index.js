@@ -12,6 +12,7 @@ const orgProjection = {
   organisasjonsnummer: 1,
   leder: 1,
   overordnet: 1,
+  underordnet: 1,
   'arbeidsforhold.systemId': 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
@@ -23,6 +24,18 @@ const orgProjection = {
   'arbeidsforhold.ansettelsesprosent': 1,
   'arbeidsforhold.personalressurskategori': 1,
   'arbeidsforhold.officeLocation': 1
+}
+const allProjection = {
+  _id: 0,
+  organisasjonsId: 1,
+  navn: 1,
+  "leder.userPrincipalName": 1,
+  "overordnet.organisasjonsId": 1,
+  underordnet: 1,
+  underordnet2: 1,
+  'arbeidsforhold.navn': 1,
+  'arbeidsforhold.userPrincipalName': 1,
+  'arbeidsforhold.stillingstittel': 1,
 }
 
 const taskProjection = {
@@ -37,7 +50,7 @@ const determineParam = (param) => {
   } else if (emailRegex.test(param)) {
     return { query: { 'arbeidsforhold.userPrincipalName': param }, searchProjection: orgProjection, type: 'unique' }
   } else if (param.toLowerCase() === 'all') {
-  return { query: {}, searchProjection: orgProjection, type: 'all' }
+  return { query: {}, searchProjection: allProjection, type: 'all' }
   } else {
     return { query: { navn: {'$regex' : param, '$options' : 'i'} }, searchProjection: orgProjection, type: 'search' }
   }
@@ -63,7 +76,8 @@ module.exports = async function (context, req) {
 
   try {
     const org = await collection.find(query).project(searchProjection).toArray()
-    const tasks = "rer"
+    
+    if (type === 'all') return { status: 200, body: org }
     const positionIds = org.map(unit => {
       return unit.arbeidsforhold.map(forhold => forhold.systemId)
     })
