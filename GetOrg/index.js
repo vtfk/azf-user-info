@@ -32,10 +32,10 @@ const allProjection = {
   "leder.userPrincipalName": 1,
   "overordnet.organisasjonsId": 1,
   underordnet: 1,
-  underordnet2: 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
   'arbeidsforhold.stillingstittel': 1,
+  'arbeidsforhold.personalressurskategori': 1
 }
 
 const taskProjection = {
@@ -51,6 +51,8 @@ const determineParam = (param) => {
     return { query: { 'arbeidsforhold.userPrincipalName': param }, searchProjection: orgProjection, type: 'unique' }
   } else if (param.toLowerCase() === 'all') {
   return { query: {}, searchProjection: allProjection, type: 'all' }
+  } else if (param.toLowerCase() === 'allstructured') {
+    return { query: {}, searchProjection: allProjection, type: 'allStructured' }
   } else {
     return { query: { navn: {'$regex' : param, '$options' : 'i'} }, searchProjection: orgProjection, type: 'search' }
   }
@@ -58,7 +60,7 @@ const determineParam = (param) => {
 
 module.exports = async function (context, req) {
   logConfig({
-    prefix: 'azf-user-info - GetEmployee',
+    prefix: 'azf-user-info - GetOrg',
     azure: {
       context,
       excludeInvocationId: true
@@ -70,17 +72,21 @@ module.exports = async function (context, req) {
   if (!ver.verified) return { status: 401, body: `You are not authorized to view this resource, ${ver.msg}` }
 
   const { query, searchProjection, type } = determineParam(req.params.param)
+  logger('info', [query, type])
 
   const db = mongo()
   let collection = db.collection(mongoDB.orgCollection)
 
   try {
+    if (type === 'allStructured') collection = db.collection(mongoDB.orgStructuredCollection)
+
     const org = await collection.find(query).project(searchProjection).toArray()
-    
-    if (type === 'all') return { status: 200, body: org }
+    if (type === 'all' || type === 'allStructured') return { status: 200, body: org }
+
     const positionIds = org.map(unit => {
       return unit.arbeidsforhold.map(forhold => forhold.systemId)
     })
+
 
     const taskQuery = { "positionTasks.positionId": { "$in": positionIds.flat() } }
     collection = db.collection(mongoDB.competenceCollection)

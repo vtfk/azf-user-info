@@ -10,7 +10,8 @@ module.exports = {
     password: process.env.FINT_PASSWORD ?? '1234passord',
     tokenUrl: process.env.FINT_TOKEN_URL ?? 'tututThomasToget.no',
     scope: process.env.FINT_SCOPE ?? 'etSkikkeligSkuup',
-    url: process.env.FINT_URL ?? 'fitnintinintinint.tull.no'
+    url: process.env.FINT_URL ?? 'fitnintinintinint.no',
+    graphUrl: process.env.FINT_GRAPH_URL ?? 'fintnfinininisjdjfjkd.no'
   },
   graphClient: {
     clientId: process.env.GRAPH_CLIENT_ID ?? 'superId',
@@ -25,6 +26,7 @@ module.exports = {
     employeeCollection: process.env.MONGO_DB_EMPLOYEE_COLLECTION ?? 'jauddaaa',
     studentCollection: process.env.MONGO_DB_STUDENT_COLLECTION ?? 'jauddaaa',
     orgCollection: process.env.MONGO_DB_ORG_COLLECTION ?? 'jauddaaa',
+    orgStructuredCollection: process.env.MONGO_DB_ORG_STRUCTURED_COLLECTION ?? 'jauddaaa',
     competenceCollection: process.env.MONGO_DB_COMPETENCE_COLLECTION ?? 'jauddaaa',
     reportCollection: process.env.MONGO_DB_REPORT_COLLECTION ?? 'jauddaaa'
   },
