@@ -127,6 +127,8 @@ project.lock.json
 .secrets
 appsettings.json
 local.settings.json
+local.settings-test.json
+local.settings-prod.json
 
 node_modules
 dist
