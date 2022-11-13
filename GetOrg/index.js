@@ -35,7 +35,8 @@ const allProjection = {
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
   'arbeidsforhold.stillingstittel': 1,
-  'arbeidsforhold.personalressurskategori': 1
+  'arbeidsforhold.personalressurskategori': 1,
+  'arbeidsforhold.arbeidsforholdsperiode': 1
 }
 
 const taskProjection = {
