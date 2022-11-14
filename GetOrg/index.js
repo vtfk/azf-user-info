@@ -51,9 +51,7 @@ const determineParam = (param) => {
   } else if (emailRegex.test(param)) {
     return { query: { 'arbeidsforhold.userPrincipalName': param }, searchProjection: orgProjection, type: 'unique' }
   } else if (param.toLowerCase() === 'all') {
-  return { query: {}, searchProjection: allProjection, type: 'all' }
-  } else if (param.toLowerCase() === 'allstructured') {
-    return { query: {}, searchProjection: allProjection, type: 'allStructured' }
+    return { query: {}, searchProjection: allProjection, type: 'all' }
   } else {
     return { query: { navn: {'$regex' : param, '$options' : 'i'} }, searchProjection: orgProjection, type: 'search' }
   }
@@ -79,10 +77,8 @@ module.exports = async function (context, req) {
   let collection = db.collection(mongoDB.orgCollection)
 
   try {
-    if (type === 'allStructured') collection = db.collection(mongoDB.orgStructuredCollection)
-
     const org = await collection.find(query).project(searchProjection).toArray()
-    if (type === 'all' || type === 'allStructured') return { status: 200, body: org }
+    if (type === 'all') return { status: 200, body: org }
 
     const positionIds = org.map(unit => {
       return unit.arbeidsforhold.map(forhold => forhold.systemId)
