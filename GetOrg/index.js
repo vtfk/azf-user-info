@@ -131,7 +131,8 @@ module.exports = async function (context, req) {
             soloRole: comp?.other?.soloRole ?? null,
             perfCounty: comp?.perfCounty ?? null
           }
-        })
+        }),
+        isPrivileged: true
       }
     })
     return { status: 200, body: orgRes }
