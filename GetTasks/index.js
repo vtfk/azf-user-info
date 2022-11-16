@@ -24,7 +24,7 @@ module.exports = async function (context, req) {
   if (!ver.verified) return { status: 401, body: `You are not authorized to view this resource, ${ver.msg}` }
 
   const param = req.params.unit.replace(/[^a-zA-Z0-9æøåÆØÅ\- ]/gi,'')
-  logger('info', [`Sanitized param, searching for "${param}"`])
+  logger('info', [ver.upn, `Sanitized param, searching for "${param}"`])
 
   /*
   Gå gjennom mongo - competence data, alle stillinger sine tasks, unike.

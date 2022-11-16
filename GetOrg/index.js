@@ -1,5 +1,5 @@
 const mongo = require('../lib/mongo')
-const { mongoDB, appRoles } = require('../config')
+const { mongoDB, appRoles, leaderLevel } = require('../config')
 const { verifyToken } = require('../lib/verifyToken')
 const { logConfig, logger } = require('@vtfk/logger')
 
@@ -24,6 +24,7 @@ const orgProjection = {
   'arbeidsforhold.ansettelsesprosent': 1,
   'arbeidsforhold.personalressurskategori': 1,
   'arbeidsforhold.officeLocation': 1,
+  'arbeidsforhold.arbeidssted.struktur': 1,
   'arbeidsforhold.mandatoryCompetenceInput': 1,
 }
 
@@ -59,9 +60,25 @@ const determineParam = (param) => {
   }
 }
 
-const isLeader = (upn, leaderUpn) => {
+const isLeader = (upn, leaderUpn, forhold, level) => {
   if (upn === leaderUpn) return true
-  else return false
+  if (forhold.length === 0) return false
+  if (!forhold[0].arbeidssted?.struktur) return false
+  const struct = forhold[0].arbeidssted.struktur.slice(0, level)
+  if (struct.find(unit => unit.leder === upn)) return true
+  return false
+}
+
+
+const removeStructure = (orgs) => {
+  const orgsWithoutStructure = orgs.map(unit => {
+    unit.arbeidsforhold = unit.arbeidsforhold.map(forhold => {
+      delete forhold.arbeidssted
+      return forhold
+    })
+    return unit
+  })
+  return orgsWithoutStructure
 }
 
 module.exports = async function (context, req) {
@@ -78,10 +95,10 @@ module.exports = async function (context, req) {
   if (!ver.verified) return { status: 401, body: `You are not authorized to view this resource, ${ver.msg}` }
 
   let privileged = ver.roles.includes(appRoles.admin) || ver.roles.includes(appRoles.privileged)
-  logger('info', ['checked if has privileged role - result', privileged])
+  logger('info', [ver.upn, 'checked if has privileged role - result', privileged])
 
   const { query, searchProjection, type } = determineParam(req.params.param)
-  logger('info', [query, type])
+  logger('info', [ver.upn, query, type])
 
   const db = mongo()
   let collection = db.collection(mongoDB.orgCollection)
@@ -91,7 +108,11 @@ module.exports = async function (context, req) {
     if (type === 'all') return { status: 200, body: org }
     
     // If several returned - quick return result
-    if (org.length > 1) { return { status: 200, body: org } }
+    if (org.length > 1) { return { status: 200, body: removeStructure(org) } }
+
+    // If none returned - quick return empty array
+    if (org.length === 0) { return { status: 200, body: [] } }
+    
     const positionIds = org.map(unit => {
       return unit.arbeidsforhold.map(forhold => forhold.systemId)
     })
@@ -110,9 +131,13 @@ module.exports = async function (context, req) {
         })
       }
     })
-    privileged = privileged || isLeader(ver.upn, orgRes[0].leder.userPrincipalName)
 
-    if (!privileged) return { status: 200, body: orgRes }
+    // Check if privileged or leader
+    const leaderPrivilege = isLeader(ver.upn, orgRes[0].leder.userPrincipalName, orgRes[0].arbeidsforhold, leaderLevel)
+    logger('info', [ver.upn, `checked if leader within level ${leaderLevel} for ${orgRes[0].kortnavn} - result`, leaderPrivilege])
+    privileged = privileged || leaderPrivilege
+
+    if (!privileged) return { status: 200, body: removeStructure(orgRes) }
 
     const competenceProjection = {
       _id: 0,
@@ -135,7 +160,7 @@ module.exports = async function (context, req) {
         isPrivileged: true
       }
     })
-    return { status: 200, body: orgRes }
+    return { status: 200, body: removeStructure(orgRes) }
   } catch (error) {
     return { status: 500, body: error.message }
   }

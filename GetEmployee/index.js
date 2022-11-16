@@ -1,5 +1,5 @@
 const mongo = require('../lib/mongo')
-const { mongoDB, appRoles } = require('../config')
+const { mongoDB, appRoles, leaderLevel } = require('../config')
 const { verifyToken, isLeader } = require('../lib/verifyToken')
 const { logger, logConfig } = require('@vtfk/logger')
 const { employeeProjection, nameSearchProjection, filterEmployeeData } = require('../lib/employee/employeeProjections')
@@ -34,7 +34,7 @@ module.exports = async function (context, req) {
   if (!ver.verified) return { status: 401, body: `You are not authorized to view this resource, ${ver.msg}` }
   
   const privileged = ver.roles.includes(appRoles.admin) || ver.roles.includes(appRoles.privileged)
-  logger('info', ['checked if has privileged role - result', privileged])
+  logger('info', [ver.upn, 'checked if has privileged role - result', privileged])
 
   if (!req.params.id) return { status: 400, body: 'Please specify query param {id} with an ssn, upn, samAccountName, ansattnummer, or name' }
   const { query, searchProjection, type } = determineParam(req.params.id)
@@ -43,38 +43,39 @@ module.exports = async function (context, req) {
   // Check if can use ssn as query
   if (!privileged && query.fodselsnummer) return { status: 401, body: 'You are not authorized to use ssn as query' }
 
-  logger('info', [`running query for`, query])
+  logger('info', [ver.upn, `running query for`, query])
   const db = mongo()
   let collection = db.collection(mongoDB.employeeCollection)
   let res = {}
   try {
     const employeeData = await collection.find(query).limit(10).project(searchProjection).toArray()
     if (employeeData.length === 0) {
-      logger('info', ["No users found with", query])
+      logger('info', [ver.upn, "No users found with", query])
       return { status: 404, body: `No users found with "${JSON.stringify(query)}"` }
     }
-    logger('info', [`Found employee data for user`, query])
+    logger('info', [ver.upn, `Found employee data for user`, query])
     res = employeeData
   } catch (error) {
-    logger('error', error.message)
+    logger('error', [ver.upn, error.message])
     return { status: 500, body: error.message }
   }
 
   if (type === 'search') {
-    logger('info', [`Using searchProjection`, query, 'do not need competence data'])
+    logger('info', [ver.upn, `Using searchProjection`, query, 'do not need competence data'])
     return { status: 200, body: res }
   } else if (!privileged) {
     // Check if has leader privilege
     const structures = res[0].aktiveArbeidsforhold.map(forhold => {
       return forhold.arbeidssted.struktur
     })
-    const leaderPrivilege = isLeader(req.headers.authorization, structures, 2)
+
+    const leaderPrivilege = isLeader(req.headers.authorization, structures, leaderLevel)
 
     if (leaderPrivilege) {
-      logger('info', [`${ver.upn} is leader for ${res[0].userPrincipalName}`, 'Will expand result with competence data'])
+      logger('info', [`${ver.upn} is leader for ${res[0].userPrincipalName} - level ${leaderLevel}`, 'Will expand result with competence data'])
     }
     else {
-      logger('info', [`Not privileged`, query, 'do not need competence data'])
+      logger('info', [ver.upn, `Not privileged`, query, 'do not need competence data'])
       res = filterEmployeeData(res[0])
       return { status: 200, body: [res] }
     }
@@ -88,11 +89,11 @@ module.exports = async function (context, req) {
     if (competenceData.length === 0) {
       res.competenceData = null
     } else {
-      logger('info', [`Found competence data for user`, query])
+      logger('info', [ver.upn, `Found competence data for user`, query])
       res.competenceData = competenceData[0]
     }
   } catch (error) {
-    logger('error', error.message)
+    logger('error', [ver.upn, error.message])
     return { status: 500, body: error.message }
   }
   return { status: 200, body: [ { ...res, isPrivileged: true } ] }

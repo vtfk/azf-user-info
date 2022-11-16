@@ -37,11 +37,11 @@ module.exports = async function (context, req) {
         fodselsnummer: res.fodselsnummer
       }
     } else {
-      logger('info', [`Found competence data for user "${ver.upn}"`])
+      logger('info', [ver.upn, `Found competence data for user "${ver.upn}"`])
       res.competenceData = competenceData[0]
     }
   } catch (error) {
-    logger('error', error.message)
+    await logger('error', [ver.upn, error.message])
     return { status: 500, body: error.message }
   }
 
