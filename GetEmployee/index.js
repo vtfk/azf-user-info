@@ -97,6 +97,7 @@ module.exports = async function (context, req) {
       res.competenceData = competenceData[0]
       delete res.competenceData.fodselsnummer
     }
+    delete res.fodselsnummer
   } catch (error) {
     logger('error', [ver.upn, error.message])
     return { status: 500, body: error.message }
