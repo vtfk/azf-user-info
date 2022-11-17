@@ -2,6 +2,7 @@ const mongo = require('../lib/mongo')
 const { mongoDB, appRoles, leaderLevel } = require('../config')
 const { verifyToken } = require('../lib/verifyToken')
 const { logConfig, logger } = require('@vtfk/logger')
+const { getArbeidsforholdsType } = require('../lib/employee/employeeProjections')
 
 const orgProjection = {
   _id: 0,
@@ -22,6 +23,7 @@ const orgProjection = {
   'arbeidsforhold.stillingsnummer': 1,
   'arbeidsforhold.stillingstittel': 1,
   'arbeidsforhold.ansettelsesprosent': 1,
+  'arbeidsforhold.arbeidsforholdstype': 1,
   'arbeidsforhold.personalressurskategori': 1,
   'arbeidsforhold.officeLocation': 1,
   'arbeidsforhold.arbeidssted.struktur': 1,
@@ -70,15 +72,16 @@ const isLeader = (upn, leaderUpn, forhold, level) => {
 }
 
 
-const removeStructure = (orgs) => {
-  const orgsWithoutStructure = orgs.map(unit => {
+const repackArbeidsforhold = (orgs) => {
+  const repacked = orgs.map(unit => {
     unit.arbeidsforhold = unit.arbeidsforhold.map(forhold => {
-      delete forhold.arbeidssted
+      delete forhold.arbeidssted // remove strukur, don't need it
+      forhold.arbeidsforholdstype = getArbeidsforholdsType(forhold.arbeidsforholdstype)
       return forhold
     })
     return unit
   })
-  return orgsWithoutStructure
+  return repacked
 }
 
 module.exports = async function (context, req) {
@@ -104,11 +107,11 @@ module.exports = async function (context, req) {
   let collection = db.collection(mongoDB.orgCollection)
 
   try {
-    const org = await collection.find(query).project(searchProjection).toArray()
+    let org = await collection.find(query).project(searchProjection).toArray()
     if (type === 'all') return { status: 200, body: org }
     
     // If several returned - quick return result
-    if (org.length > 1) { return { status: 200, body: removeStructure(org) } }
+    if (org.length > 1) { return { status: 200, body: repackArbeidsforhold(org) } }
 
     // If none returned - quick return empty array
     if (org.length === 0) { return { status: 200, body: [] } }
@@ -137,7 +140,7 @@ module.exports = async function (context, req) {
     logger('info', [ver.upn, `checked if leader within level ${leaderLevel} for ${orgRes[0].kortnavn} - result`, leaderPrivilege])
     privileged = privileged || leaderPrivilege
 
-    if (!privileged) return { status: 200, body: removeStructure(orgRes) }
+    if (!privileged) return { status: 200, body: repackArbeidsforhold(orgRes) }
 
     const competenceProjection = {
       _id: 0,
@@ -160,7 +163,7 @@ module.exports = async function (context, req) {
         isPrivileged: true
       }
     })
-    return { status: 200, body: removeStructure(orgRes) }
+    return { status: 200, body: repackArbeidsforhold(orgRes) }
   } catch (error) {
     return { status: 500, body: error.message }
   }

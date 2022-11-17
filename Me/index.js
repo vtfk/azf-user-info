@@ -1,8 +1,8 @@
 const mongo = require('../lib/mongo')
-const { mongoDB, appRoles } = require('../config')
+const { mongoDB } = require('../config')
 const { verifyToken } = require('../lib/verifyToken')
 const { logger, logConfig } = require('@vtfk/logger')
-const { employeeProjection } = require('../lib/employee/employeeProjections')
+const { employeeProjection, repackArbeidsforhold } = require('../lib/employee/employeeProjections')
 
 module.exports = async function (context, req) {
   logConfig({
@@ -25,7 +25,7 @@ module.exports = async function (context, req) {
     if (employeeData.length === 0) {
       return { status: 404, body: `No users found with "userPrincipalName": "${ver.upn}"` }
     }
-    res = { ...employeeData[0] }
+    res = { ...repackArbeidsforhold(employeeData)[0] } // Changes arbeidsforholdstype to relevant name
   } catch (error) {
     return { status: 500, body: error.message }
   }

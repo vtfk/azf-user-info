@@ -2,7 +2,7 @@ const mongo = require('../lib/mongo')
 const { mongoDB, appRoles, leaderLevel } = require('../config')
 const { verifyToken, isLeader } = require('../lib/verifyToken')
 const { logger, logConfig } = require('@vtfk/logger')
-const { employeeProjection, nameSearchProjection, filterEmployeeData } = require('../lib/employee/employeeProjections')
+const { employeeProjection, nameSearchProjection, filterEmployeeData, repackArbeidsforhold } = require('../lib/employee/employeeProjections')
 
 const determineParam = (id) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
@@ -76,6 +76,8 @@ module.exports = async function (context, req) {
     }
     else {
       logger('info', [ver.upn, `Not privileged`, query, 'do not need competence data'])
+      // Repack arbeidsforholdstyper
+      res = repackArbeidsforhold(res)
       res = filterEmployeeData(res[0])
       return { status: 200, body: [res] }
     }
@@ -83,13 +85,16 @@ module.exports = async function (context, req) {
 
   // If privileged and specific query we expand with competence data
   try {
+    // Repack arbeidsforholdstyper
+    res = repackArbeidsforhold(res)
     res = { ...res[0] }
     collection = db.collection(mongoDB.competenceCollection)
     const competenceData = await collection.find({ fodselsnummer: res.fodselsnummer }).project({ _id: 0 }).toArray()
     if (competenceData.length === 0) {
-      res.competenceData = null
+      res.competenceData = {}
     } else {
       logger('info', [ver.upn, `Found competence data for user`, query])
+      delete res.competenceData.fodselsnummer
       res.competenceData = competenceData[0]
     }
   } catch (error) {
