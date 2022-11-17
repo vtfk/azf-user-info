@@ -94,8 +94,8 @@ module.exports = async function (context, req) {
       res.competenceData = {}
     } else {
       logger('info', [ver.upn, `Found competence data for user`, query])
-      delete res.competenceData.fodselsnummer
       res.competenceData = competenceData[0]
+      delete res.competenceData.fodselsnummer
     }
   } catch (error) {
     logger('error', [ver.upn, error.message])
