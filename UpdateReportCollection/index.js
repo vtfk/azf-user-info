@@ -22,6 +22,7 @@ const mapReportData = ( raw ) => {
   const hovedstilling = raw.aktiveArbeidsforhold.find(stilling => stilling.hovedstilling)
   const tilleggstillinger = raw.aktiveArbeidsforhold.filter(stilling => !stilling.hovedstilling)
   const repacked = {
+    fodselsnummer: raw.fodselsnummer ?? 'hva i huleste',
     kontorsted: raw.azureAd?.officeLocation ?? null,
     hovedarbeidsted: hovedstilling?.arbeidssted?.navn ?? null,
     hovedarbeidstedKortnavn: hovedstilling?.arbeidssted?.kortnavn ?? null,
@@ -39,8 +40,16 @@ const mapReportData = ( raw ) => {
 
 
 const competenceProjection = {
+  _id: 0,
   fodselsnummer: 1,
-  education: 1
+  education: 1,
+  positionTasks: 1,
+  otherPositions: 1,
+  workExperience: 1,
+  other: 1,
+  experience: 1,
+  certifications: 1,
+  perfCounty: 1
 }
 
 
@@ -158,9 +167,6 @@ module.exports = async function (context, myTimer) {
       delete merged.competenceData.fodselsnummer
       return merged
     })
-
-    console.log(res[0])
-
 
     await logger('info', ['Successfully merged employeeData with competenceData'])
 
