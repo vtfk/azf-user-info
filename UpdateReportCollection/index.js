@@ -14,13 +14,14 @@ const employeeProjection = {
   'aktiveArbeidsforhold.stillingskode.navn': 1,
   'aktiveArbeidsforhold.arbeidssted.navn': 1,
   'aktiveArbeidsforhold.arbeidssted.kortnavn': 1,
-  'aktiveArbeidsforhold.hovedstilling': 1
+  'aktiveArbeidsforhold.hovedstilling': 1,
+  'mandatoryCompetenceInput': 1
 }
 
 const mapReportData = ( raw ) => {
   const hovedstilling = raw.aktiveArbeidsforhold.find(stilling => stilling.hovedstilling)
   const tilleggstillinger = raw.aktiveArbeidsforhold.filter(stilling => !stilling.hovedstilling)
-  return {
+  const repacked = {
     kontorsted: raw.azureAd?.officeLocation ?? null,
     hovedarbeidsted: hovedstilling?.arbeidssted?.navn ?? null,
     hovedarbeidstedKortnavn: hovedstilling?.arbeidssted?.kortnavn ?? null,
@@ -29,9 +30,13 @@ const mapReportData = ( raw ) => {
     ansattkategori: raw.personalressurskategori?.navn,
     ansattkategoriKode: raw.personalressurskategori?.kode,
     kjonn: raw.kjonn === '1' ? 'Mann' : (raw.kjonn === '2' ? 'Kvinne' : 'Ukjent'),
-    postnummer: (raw.bostedsadresse?.postnummer && Number(raw.bostedsadresse?.postnummer)) ? raw.bostedsadresse.postnummer : null
+    postnummer: (raw.bostedsadresse?.postnummer && Number(raw.bostedsadresse?.postnummer)) ? raw.bostedsadresse.postnummer : null,
+    mandatoryCompetenceInput: raw.mandatoryCompetenceInput ?? false
   }
+
+  return repacked
 }
+
 
 const competenceProjection = {
   fodselsnummer: 1,
@@ -91,15 +96,25 @@ const mockCompetence = () => {
     ],
     other: {
       "soloRole": soloRoles[randomSoloRole],
-      "soloRoleDescription": "Lage solobrus, og lage mat til hunder på gata",
-      "preferredCounty": preferredCounties[randomPreferredCounty]
-    }
+      "soloRoleDescription": "Lage solobrus, og lage mat til hunder på gata"
+    },
+    perfCounty: preferredCounties[randomPreferredCounty]
   }
 }
 
 const defaultCompetence = {
   fodselsnummer: '12345678911',
-  education: []
+  education: [],
+  positionTasks: [],
+  otherPositions: [],
+  workExperience: [],
+  other: {
+    soloRole: null,
+    soloRoleDescription: null,
+  },
+  experience: [],
+  certifications: [],
+  perfCounty: null
 }
 
 module.exports = async function (context, myTimer) {
@@ -117,7 +132,7 @@ module.exports = async function (context, myTimer) {
   try {
     // EmployeeData
     logger('info', ['Trying to fetch employeeData'])
-    const employeeData = await collection.find({ harAktivtArbeidsforhold: true }).project(employeeProjection).toArray()
+    const employeeData = await collection.find({ harAktivtArbeidsforhold: true, mandatoryCompetenceInput: true }).project(employeeProjection).toArray()
     logger('info', ['Successfully fetched employeeData'])
 
     // CompetenceData
@@ -128,9 +143,9 @@ module.exports = async function (context, myTimer) {
 
     logger('info', ['Merging employeeData with competenceData...'])
     if (mock) logger('info', ['Mock is true - generating mock-competence for users that have not set competence yet'])
-    //const filtered = employeeData.filter(emp => emp.aktiveArbeidsforhold.find(forhold => forhold.lonnsprosent > 0) !== undefined)
-    const filtered = employeeData.map(raw => mapReportData(raw)).filter(employee => ['Fylkeshuset i Tønsberg', 'Fylkeshuset T18 Skien', 'Fylkesbakken Skien', 'Fylkessenter Seljord'].includes(employee.kontorsted))
-    const res = filtered.map(emp => {
+
+    let res = employeeData.map((emp) => mapReportData(emp))
+    res = employeeData.map(emp => {
       let comp = competenceData.find(c => c.fodselsnummer === emp.fodselsnummer)
       if (mock) {
         comp = mockCompetence()
@@ -143,11 +158,16 @@ module.exports = async function (context, myTimer) {
       delete merged.competenceData.fodselsnummer
       return merged
     })
+
+    console.log(res[0])
+
+
     await logger('info', ['Successfully merged employeeData with competenceData'])
 
     await logger('info', ['Updating report blob storage with new data'])
     const createResult = await save('reportData.json', JSON.stringify(res, null, 2))
     await logger('info', ['Successfully created new report data blob', createResult])
+
   } catch (error) {
     await logger('error', error.message)
   }
