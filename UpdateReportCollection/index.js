@@ -22,7 +22,6 @@ const mapReportData = ( raw ) => {
   const hovedstilling = raw.aktiveArbeidsforhold.find(stilling => stilling.hovedstilling)
   const tilleggstillinger = raw.aktiveArbeidsforhold.filter(stilling => !stilling.hovedstilling)
   const repacked = {
-    fodselsnummer: raw.fodselsnummer ?? 'hva i huleste',
     kontorsted: raw.azureAd?.officeLocation ?? null,
     hovedarbeidsted: hovedstilling?.arbeidssted?.navn ?? null,
     hovedarbeidstedKortnavn: hovedstilling?.arbeidssted?.kortnavn ?? null,
@@ -32,7 +31,11 @@ const mapReportData = ( raw ) => {
     ansattkategoriKode: raw.personalressurskategori?.kode,
     kjonn: raw.kjonn === '1' ? 'Mann' : (raw.kjonn === '2' ? 'Kvinne' : 'Ukjent'),
     postnummer: (raw.bostedsadresse?.postnummer && Number(raw.bostedsadresse?.postnummer)) ? raw.bostedsadresse.postnummer : null,
-    mandatoryCompetenceInput: raw.mandatoryCompetenceInput ?? false
+    mandatoryCompetenceInput: raw.mandatoryCompetenceInput ?? false,
+    preferredCounty: raw.competenceData?.perfCounty ?? null,
+    soloRole: raw.competenceData?.other?.soloRole ?? null,
+    education: raw.competenceData?.education ?? [],
+    educationDegrees: raw.competenceData?.education ? raw.competenceData.education.map(edu => edu.degree).join(';') : null
   }
 
   return repacked
@@ -153,8 +156,7 @@ module.exports = async function (context, myTimer) {
     logger('info', ['Merging employeeData with competenceData...'])
     if (mock) logger('info', ['Mock is true - generating mock-competence for users that have not set competence yet'])
 
-    let res = employeeData.map((emp) => mapReportData(emp))
-    res = employeeData.map(emp => {
+    let res = employeeData.map(emp => {
       let comp = competenceData.find(c => c.fodselsnummer === emp.fodselsnummer)
       if (mock) {
         comp = mockCompetence()
@@ -167,6 +169,8 @@ module.exports = async function (context, myTimer) {
       delete merged.competenceData.fodselsnummer
       return merged
     })
+
+    res = res.map((emp) => mapReportData(emp))
 
     await logger('info', ['Successfully merged employeeData with competenceData'])
 
