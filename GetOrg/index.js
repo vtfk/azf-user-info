@@ -44,6 +44,18 @@ const allProjection = {
   'arbeidsforhold.arbeidsforholdsperiode': 1
 }
 
+const allAdminProjection = {
+  _id: 0,
+  organisasjonsId: 1,
+  navn: 1,
+  "leder.userPrincipalName": 1,
+  "overordnet.organisasjonsId": 1,
+  underordnet: 1,
+  'arbeidsforhold.navn': 1,
+  'arbeidsforhold.userPrincipalName': 1,
+  'arbeidsforhold.mandatoryCompetenceInput': 1
+}
+
 const taskProjection = {
   _id: 0,
   positionTasks: 1
@@ -57,6 +69,8 @@ const determineParam = (param) => {
     return { query: { $or: [ { 'arbeidsforhold.userPrincipalName': param }, {'leder.userPrincipalName': param } ] }, searchProjection: orgProjection, type: 'unique' }
   } else if (param.toLowerCase() === 'all') {
     return { query: {}, searchProjection: allProjection, type: 'all' }
+  } else if (param.toLowerCase() === 'alladmin') {
+    return { query: {}, searchProjection: allAdminProjection, type: 'allAdmin' }
   } else {
     return { query: { navn: {'$regex' : param, '$options' : 'i'} }, searchProjection: orgProjection, type: 'search' }
   }
@@ -103,12 +117,56 @@ module.exports = async function (context, req) {
   const { query, searchProjection, type } = determineParam(req.params.param)
   logger('info', [ver.upn, query, type])
 
+  let isAdmin = ver.roles.includes(appRoles.admin)
+  if (type === 'allAdmin' && !isAdmin) return { status: 401, body: `You are not authorized to view this resource, you do not have admin role` }
+
   const db = mongo()
   let collection = db.collection(mongoDB.orgCollection)
 
   try {
     let org = await collection.find(query).project(searchProjection).toArray()
     if (type === 'all') return { status: 200, body: org }
+
+    // Admin orgs - get competence for all employees as well as employeedata
+    if (type === 'allAdmin') {
+      let allEmployees = []
+      for (const unit of org) {
+        allEmployees = [...allEmployees, ...unit.arbeidsforhold]
+      }
+      const competenceProjection = {
+        _id: 0,
+        "other.soloRole": 1,
+        perfCounty: 1,
+        positionTasks: 1,
+        userPrincipalName: 1
+      }
+      collection = db.collection(mongoDB.competenceCollection)
+      const competence =  await collection.find({}).project(competenceProjection).toArray()
+      org = org.map(unit => {
+        const leader = allEmployees.find(l => l.userPrincipalName === unit.leder.userPrincipalName)
+        const leaderCompetence = competence.find(c => c.userPrincipalName === unit.leder.userPrincipalName)
+        const leaderWithCompetence = {
+          ...leader,
+          positionTasks: leaderCompetence?.positionTasks ?? [],
+          soloRole: leaderCompetence?.other?.soloRole ?? null,
+          perfCounty: leaderCompetence?.perfCounty ?? null
+        }
+        return {
+          ...unit,
+          leder: leaderWithCompetence,
+          arbeidsforhold: unit.arbeidsforhold.map(forhold => {
+            const comp = competence.find(c => c.userPrincipalName === forhold.userPrincipalName)
+            return {
+              ...forhold,
+              positionTasks: comp?.positionTasks ?? [],
+              soloRole: comp?.other?.soloRole ?? null,
+              perfCounty: comp?.perfCounty ?? null
+            }
+          })
+        }
+      })
+      return { status: 200, body: org }
+    }
     
     // If several returned - quick return result
     if (org.length > 1) { return { status: 200, body: repackArbeidsforhold(org) } }
