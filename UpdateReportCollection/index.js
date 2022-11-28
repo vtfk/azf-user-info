@@ -21,6 +21,11 @@ const employeeProjection = {
 const mapReportData = ( raw ) => {
   const hovedstilling = raw.aktiveArbeidsforhold.find(stilling => stilling.hovedstilling)
   const tilleggstillinger = raw.aktiveArbeidsforhold.filter(stilling => !stilling.hovedstilling)
+  let hovedOppgaver = []
+  if (hovedstilling && raw.competenceData && raw.competenceData.positionTasks) {
+    const mainTasks = raw.competenceData.positionTasks.find(pt => pt.positionId === hovedstilling.systemId)
+    if (mainTasks && mainTasks.tasks && Array.isArray(mainTasks.tasks)) hovedOppgaver = mainTasks.tasks
+  }
   const repacked = {
     kontorsted: raw.azureAd?.officeLocation ?? null,
     hovedarbeidsted: hovedstilling?.arbeidssted?.navn ?? null,
@@ -34,6 +39,8 @@ const mapReportData = ( raw ) => {
     mandatoryCompetenceInput: raw.mandatoryCompetenceInput ?? false,
     preferredCounty: raw.competenceData?.perfCounty ?? null,
     soloRole: raw.competenceData?.other?.soloRole ?? null,
+    soloRoleDescription: raw.competenceData?.other?.soloRoleDescription ?? null,
+    hovedOppgaver: hovedOppgaver.join(';'),
     education: raw.competenceData?.education ?? [],
     educationDegrees: raw.competenceData?.education ? raw.competenceData.education.map(edu => edu.degree).join(';') : null
   }
