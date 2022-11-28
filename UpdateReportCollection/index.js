@@ -21,10 +21,13 @@ const employeeProjection = {
 const mapReportData = ( raw ) => {
   const hovedstilling = raw.aktiveArbeidsforhold.find(stilling => stilling.hovedstilling)
   const tilleggstillinger = raw.aktiveArbeidsforhold.filter(stilling => !stilling.hovedstilling)
-  let hovedOppgaver = []
-  if (hovedstilling && raw.competenceData && raw.competenceData.positionTasks) {
-    const mainTasks = raw.competenceData.positionTasks.find(pt => pt.positionId === hovedstilling.systemId)
-    if (mainTasks && mainTasks.tasks && Array.isArray(mainTasks.tasks)) hovedOppgaver = mainTasks.tasks
+  let keyTasks = []
+  let additionalKeyTasks = []
+  if (raw.competenceData && raw.competenceData.positionTasks) {
+    for (const pt of raw.competenceData.positionTasks) {
+      if (pt.positionId.includes('--')) keyTasks = keyTasks.concat(pt.tasks)
+      else additionalKeyTasks = additionalKeyTasks.concat(pt.tasks)
+    }
   }
   const repacked = {
     kontorsted: raw.azureAd?.officeLocation ?? null,
@@ -40,7 +43,8 @@ const mapReportData = ( raw ) => {
     preferredCounty: raw.competenceData?.perfCounty ?? null,
     soloRole: raw.competenceData?.other?.soloRole ?? null,
     soloRoleDescription: raw.competenceData?.other?.soloRoleDescription ?? null,
-    hovedOppgaver: hovedOppgaver.join(';'),
+    keyTasks: keyTasks.join(';'),
+    additionalKeyTasks: additionalKeyTasks.join(';'),
     education: raw.competenceData?.education ?? [],
     educationDegrees: raw.competenceData?.education ? raw.competenceData.education.map(edu => edu.degree).join(';') : null
   }
