@@ -12,7 +12,7 @@ const oldPersons = [
     fodselsnummer: '12345678911',
     fintStatus: {
       active: true,
-      lastFetched: '2022-08-29T09:34:25.571Z'
+      lastFetched: new Date().toISOString()
     }
   },
   {
