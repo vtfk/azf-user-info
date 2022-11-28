@@ -38,5 +38,15 @@ module.exports = {
     privileged: process.env.APP_ROLE_PRIVILEGED_NAME ?? 'ikkedennerolleheller'
   },
   validUpnSuffix: process.env.VALID_UPN_SUFFIX || '@blublipp.no',
-  leaderLevel: process.env.LEADER_LEVEL || 2
+  leaderLevel: process.env.LEADER_LEVEL || 2,
+  mail: {
+    from: process.env.MAIL_FROM || 'noreply@vtfk.no',
+    signature: {
+      name: 'Delprosjekt HR',
+      title: 'HR, mestring og utvikling',
+      company: 'Vestfold og Telemark fylkeskommune'
+    },
+    secret: process.env.MAIL_SECRET || 'blubbubji',
+    url: process.env.MAIL_URL || 'fhodsfjlkdsnvnnvdfk.no/mailert'
+  },
 }
