@@ -44,6 +44,30 @@ const allProjection = {
   'arbeidsforhold.arbeidsforholdsperiode': 1
 }
 
+const allSmallProjection = {
+  _id: 0,
+  organisasjonsId: 1,
+  navn: 1,
+  "leder.ansattnummer": 1,
+  "leder.navn": 1,
+  underordnet: 1,
+  'arbeidsforhold.navn': 1,
+  'arbeidsforhold.ansattnummer': 1,
+  'arbeidsforhold.stillingstittel': 1,
+}
+
+const reportProjection = {
+  _id: 0,
+  organisasjonsId: 1,
+  navn: 1,
+  "leder.userPrincipalName": 1,
+  underordnet: 1,
+  'arbeidsforhold.arbeidssted.struktur': 1,
+  'arbeidsforhold.userPrincipalName': 1,
+  'arbeidsforhold.mandatoryCompetenceInput': 1,
+  'arbeidsforhold.officeLocation': 1
+}
+
 const allAdminProjection = {
   _id: 0,
   organisasjonsId: 1,
@@ -71,6 +95,10 @@ const determineParam = (param) => {
     return { query: {}, searchProjection: allProjection, type: 'all' }
   } else if (param.toLowerCase() === 'alladmin') {
     return { query: {}, searchProjection: allAdminProjection, type: 'allAdmin' }
+  } else if (param.toLowerCase() === 'allsmall') {
+    return { query: {}, searchProjection: allSmallProjection, type: 'allSmall' }
+  } else if (param.toLowerCase().substring(0,6) === 'report') {
+    return { query: {}, searchProjection: reportProjection, type: 'report', orgId: param.substring(7, param.length) }
   } else {
     return { query: { navn: {'$regex' : param, '$options' : 'i'} }, searchProjection: orgProjection, type: 'search' }
   }
@@ -84,7 +112,6 @@ const isLeader = (upn, leaderUpn, forhold, level) => {
   if (struct.find(unit => unit.leder === upn)) return true
   return false
 }
-
 
 const repackArbeidsforhold = (orgs) => {
   const repacked = orgs.map(unit => {
@@ -114,7 +141,7 @@ module.exports = async function (context, req) {
   let privileged = ver.roles.includes(appRoles.admin) || ver.roles.includes(appRoles.privileged)
   logger('info', [ver.upn, 'checked if has privileged role - result', privileged])
 
-  const { query, searchProjection, type } = determineParam(req.params.param)
+  const { query, searchProjection, type, orgId } = determineParam(req.params.param)
   logger('info', [ver.upn, query, type])
 
   let isAdmin = ver.roles.includes(appRoles.admin)
@@ -125,7 +152,7 @@ module.exports = async function (context, req) {
 
   try {
     let org = await collection.find(query).project(searchProjection).toArray()
-    if (type === 'all') return { status: 200, body: org }
+    if (type === 'all' || type === 'allSmall') return { status: 200, body: org }
 
     // Admin orgs - get competence for all employees as well as employeedata
     if (type === 'allAdmin') {
@@ -166,6 +193,71 @@ module.exports = async function (context, req) {
         }
       })
       return { status: 200, body: org }
+    }
+
+    // REPORT
+    // Expand units and create report data, remove personal data from result
+    if (type === 'report') {
+      const paramUnit = org.find(unit => unit.organisasjonsId === orgId)
+      // Check if orgId exists
+      if (!paramUnit) return { status: 400, body: `${orgId} does not exist in db` }
+
+      // Check if privileged or leader
+      const leaderPrivilege = isLeader(ver.upn, paramUnit.leder.userPrincipalName, paramUnit.arbeidsforhold, leaderLevel)
+      logger('info', [ver.upn, `checked if leader within level ${leaderLevel} for orgId: ${orgId} - result`, leaderPrivilege])
+      privileged = privileged || leaderPrivilege
+
+      if (!privileged) return { status: 401, body: `You are not authorized to view this resource` }
+
+      // Clear up stuff
+      org = org.map(unit => {
+        unit.arbeidsforhold = unit.arbeidsforhold.map(forhold => {
+          delete forhold.arbeidssted
+          return forhold
+        })
+        return unit
+      })
+
+      // Ok we create report
+      // Get all underenheter
+      let res = [paramUnit]
+      let childrenUnits = JSON.parse(JSON.stringify(paramUnit.underordnet))
+      while (childrenUnits.length !== 0) {
+        const currentChild = org.find(unit => unit.organisasjonsId === childrenUnits[0].organisasjonsId)
+        if (currentChild) {
+          res.push(currentChild)
+          childrenUnits = [ ...childrenUnits, ...currentChild.underordnet ]
+        }
+        childrenUnits = childrenUnits.slice(1, childrenUnits.length)
+      }
+
+      // Get report competence data
+      const competenceProjection = {
+        _id: 0,
+        "other.soloRole": 1,
+        perfCounty: 1,
+        userPrincipalName: 1
+      }
+      collection = db.collection(mongoDB.competenceCollection)
+      const competence =  await collection.find({}).project(competenceProjection).toArray()
+
+      // Repack result
+      res = res.map(unit => {
+        delete unit.leder
+        delete unit.underordnet
+        unit.arbeidsforhold = unit.arbeidsforhold.map(forhold => {
+          const comp = competence.find(c => c.userPrincipalName === forhold.userPrincipalName)
+          return {
+            mandatoryCompetenceInput: forhold.mandatoryCompetenceInput,
+            officeLocation: forhold.officeLocation,
+            soloRole: comp?.other?.soloRole ?? null,
+            perfCounty: comp?.perfCounty ?? null,
+          }
+        })
+        return unit
+      })
+
+      return { status: 200, body: res }
     }
     
     // If several returned - quick return result
