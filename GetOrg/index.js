@@ -221,10 +221,13 @@ module.exports = async function (context, req) {
       // Ok we create report
       // Get all underenheter
       let res = [paramUnit]
+      const employees = [...(paramUnit.arbeidsforhold.map(emp => emp.userPrincipalName))]
       let childrenUnits = JSON.parse(JSON.stringify(paramUnit.underordnet))
       while (childrenUnits.length !== 0) {
         const currentChild = org.find(unit => unit.organisasjonsId === childrenUnits[0].organisasjonsId)
         if (currentChild) {
+          currentChild.arbeidsforhold = currentChild.arbeidsforhold.filter(emp => !employees.includes(emp.userPrincipalName))
+          employees.push(...(currentChild.arbeidsforhold.map(emp => emp.userPrincipalName)))
           res.push(currentChild)
           childrenUnits = [ ...childrenUnits, ...currentChild.underordnet ]
         }
