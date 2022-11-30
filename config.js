@@ -43,10 +43,9 @@ module.exports = {
     from: process.env.MAIL_FROM || 'noreply@vtfk.no',
     signature: {
       name: 'Delprosjekt HR',
-      title: 'HR, mestring og utvikling',
       company: 'Vestfold og Telemark fylkeskommune'
     },
     secret: process.env.MAIL_SECRET || 'blubbubji',
     url: process.env.MAIL_URL || 'fhodsfjlkdsnvnnvdfk.no/mailert'
-  },
+  }
 }
