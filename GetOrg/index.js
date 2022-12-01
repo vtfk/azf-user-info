@@ -125,6 +125,13 @@ const repackArbeidsforhold = (orgs) => {
   return repacked
 }
 
+// Get correct stillingsid / systemid - the last part sometimes changes
+const getPositionId = (systemId) => {
+  if (systemId.indexOf('--') === -1) return systemId
+  if (systemId.split('--').length === 3) return systemId.substring(0, systemId.lastIndexOf('--'))
+  return systemId
+}
+
 module.exports = async function (context, req) {
   logConfig({
     prefix: 'azf-user-info - GetOrg',
@@ -269,20 +276,26 @@ module.exports = async function (context, req) {
     // If none returned - quick return empty array
     if (org.length === 0) { return { status: 200, body: [] } }
     
-    const positionIds = org.map(unit => {
+    /*
+    const fullPositionIds = org.map(unit => {
       return unit.arbeidsforhold.map(forhold => forhold.systemId)
     })
-
-    const taskQuery = { "positionTasks.positionId": { "$in": positionIds.flat() } }
+    const otherPositionIds = org.map(unit => {
+      return unit.arbeidsforhold.map(forhold => getPositionId(forhold.systemId))
+    })
+    const positionIds = [...fullPositionIds, ...otherPositionIds]
+    */
+    // Get tasks for the position
+    // const taskQuery = { "positionTasks.positionId": { "$in": positionIds.flat() } }
     collection = db.collection(mongoDB.competenceCollection)
-    const posTasks = await collection.find(taskQuery).project(taskProjection).toArray()
+    const posTasks = await collection.find({}).project(taskProjection).toArray()
     let orgRes = org.map(unit => {
       return {
         ...unit,
         arbeidsforhold: unit.arbeidsforhold.map(forhold => {
           return {
             ...forhold,
-            tasks: posTasks.find(posTask => posTask.positionTasks.find(pos => pos.positionId === forhold.systemId))?.positionTasks.find(task => task.positionId === forhold.systemId)?.tasks ?? [] 
+            tasks: posTasks.find(posTask => posTask.positionTasks.find(pos => getPositionId(pos.positionId) === getPositionId(forhold.systemId)))?.positionTasks.find(task => getPositionId(task.positionId) === getPositionId(forhold.systemId))?.tasks ?? [] 
           }
         })
       }

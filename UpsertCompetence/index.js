@@ -12,7 +12,7 @@ module.exports = async function (context, req) {
   const db = mongo()
   const collection = db.collection(mongoDB.competenceCollection)
   try {
-    const upsertRes = await collection.replaceOne({ fodselsnummer: req.body.fodselsnummer, userPrincipalName: ver.upn }, { ...req.body, userPrincipalName: ver.upn }, { upsert: true })
+    const upsertRes = await collection.replaceOne({ fodselsnummer: req.body.fodselsnummer, userPrincipalName: ver.upn }, { ...req.body, userPrincipalName: ver.upn, timestamp: new Date().toISOString() }, { upsert: true })
     return { status: 200, body: upsertRes }
   } catch (error) {
     console.log(error)
