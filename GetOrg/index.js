@@ -115,8 +115,10 @@ const isLeader = (upn, leaderUpn, forhold, level) => {
 
 const repackArbeidsforhold = (orgs) => {
   const repacked = orgs.map(unit => {
+    unit.struktur = null
     unit.arbeidsforhold = unit.arbeidsforhold.map(forhold => {
-      delete forhold.arbeidssted // remove strukur, don't need it
+      if (forhold.arbeidssted?.struktur && !unit.struktur) unit.struktur = forhold.arbeidssted.struktur
+      delete forhold.arbeidssted // remove struktur from forhold, don't need it
       forhold.arbeidsforholdstype = getArbeidsforholdsType(forhold.arbeidsforholdstype)
       return forhold
     })
@@ -276,17 +278,6 @@ module.exports = async function (context, req) {
     // If none returned - quick return empty array
     if (org.length === 0) { return { status: 200, body: [] } }
     
-    /*
-    const fullPositionIds = org.map(unit => {
-      return unit.arbeidsforhold.map(forhold => forhold.systemId)
-    })
-    const otherPositionIds = org.map(unit => {
-      return unit.arbeidsforhold.map(forhold => getPositionId(forhold.systemId))
-    })
-    const positionIds = [...fullPositionIds, ...otherPositionIds]
-    */
-    // Get tasks for the position
-    // const taskQuery = { "positionTasks.positionId": { "$in": positionIds.flat() } }
     collection = db.collection(mongoDB.competenceCollection)
     const posTasks = await collection.find({}).project(taskProjection).toArray()
     let orgRes = org.map(unit => {
@@ -311,6 +302,7 @@ module.exports = async function (context, req) {
     const competenceProjection = {
       _id: 0,
       "other.soloRole": 1,
+      "other.soloRoleDescription": 1,
       perfCounty: 1,
       userPrincipalName: 1
     }
@@ -323,6 +315,7 @@ module.exports = async function (context, req) {
           return {
             ...forhold,
             soloRole: comp?.other?.soloRole ?? null,
+            soloRoleDescription: comp?.other?.soloRoleDescription ?? null,
             perfCounty: comp?.perfCounty ?? null
           }
         }),
