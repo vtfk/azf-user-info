@@ -35,7 +35,8 @@ module.exports = {
   mock: !!(process.env.MOCK && process.env.MOCK === 'true'),
   appRoles: {
     admin: process.env.APP_ROLE_ADMIN_NAME ?? 'dennarollenhardualdri',
-    privileged: process.env.APP_ROLE_PRIVILEGED_NAME ?? 'ikkedennerolleheller'
+    privileged: process.env.APP_ROLE_PRIVILEGED_NAME ?? 'ikkedennerolleheller',
+    applicationRead: process.env.APP_ROLE_APPLICATION_READ ?? 'ogikkedennerolleheller',
   },
   validUpnSuffix: process.env.VALID_UPN_SUFFIX || '@blublipp.no',
   leaderLevel: process.env.LEADER_LEVEL || 2,
