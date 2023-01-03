@@ -21,5 +21,25 @@ module.exports = async function (context, req) {
   await logger('info', [ver.appid, 'checked if has privileged role - result', hasAccess])
   if (!hasAccess) return { status: 401, body: `You are not authorized to view this resource, required role missing` }
 
+  if (!req.body) return { status: 400, body: 'body is required' }
+  const { managerUpn, employeeUpn } = req.body
+
+  if (!managerUpn) return { status: 400, body: 'Missing required parameter "managerUpn"' }
+  if (!employeeUpn) return { status: 400, body: 'Missing required parameter "employeeUpn"' }
+
+  return { status: 200, body: { managerUpn, employeeUpn } }
+
+  /*
+  const { upn, ssn, fullName } = req.body
+
+  if (!upn || !fullName) return { status: 400, body: 'Missing required parameter "upn" or "fullName"' }
+  if (!ssn) return { status: 400, body: 'Missing required parameter "ssn"' }
+
+  const db = mongo()
+  let collection = db.collection(mongoDB.employeeCollection)
+  let query = { "$or": { "navn": (fullName || 'ingen som heter detta her da'), "userPrincipalName": (upn || 'detta her er ikke et upn') }, "fodselsnummer": ssn }
+  const employee = await collection.find({  }).toArray()
+
   return { status: 200, body: { littData: "hallo", littmer: "funker det???", nesta: { tut: "burt" } } }
+  */
 }
