@@ -24,6 +24,8 @@ module.exports = async function (context, req) {
   if (!req.body) return { status: 400, body: 'body is required' }
   const { managerUpn, employeeUpn } = req.body
 
+  await logger('info', [ver.appid, 'this is the body', JSON.stringify(req.body), req.body])
+
   if (!managerUpn) return { status: 400, body: 'Missing required parameter "managerUpn"' }
   if (!employeeUpn) return { status: 400, body: 'Missing required parameter "employeeUpn"' }
 
