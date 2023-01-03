@@ -22,14 +22,18 @@ module.exports = async function (context, req) {
   if (!hasAccess) return { status: 401, body: `You are not authorized to view this resource, required role missing` }
 
   if (!req.body) return { status: 400, body: 'body is required' }
-  const { managerUpn, employeeUpn } = req.body
+  const upnString = req.body
 
-  await logger('info', [ver.appid, 'this is the body', JSON.stringify(req.body), req.body])
+  await logger('info', [ver.appid, 'this is the body', req.body])
 
-  if (!managerUpn) return { status: 400, body: 'Missing required parameter "managerUpn"' }
-  if (!employeeUpn) return { status: 400, body: 'Missing required parameter "employeeUpn"' }
+  if (!upnString) return { status: 400, body: 'Missing required parameter "upnString"' }
 
-  return { status: 200, body: { managerUpn, employeeUpn } }
+  const upns = upnString.split(';')
+  if (upns.length === 2) {
+    return { status: 200, body: { managerUpn: upns[0], employeeUpn: upns[1] } }
+  } else {
+    return { status: 400, body: 'upnString needs to be on the format "manager@company.com;employee@company.com' }
+  }
 
   /*
   const { upn, ssn, fullName } = req.body
