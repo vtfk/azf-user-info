@@ -36,7 +36,7 @@ module.exports = {
   appRoles: {
     admin: process.env.APP_ROLE_ADMIN_NAME ?? 'dennarollenhardualdri',
     privileged: process.env.APP_ROLE_PRIVILEGED_NAME ?? 'ikkedennerolleheller',
-    applicationRead: process.env.APP_ROLE_APPLICATION_READ ?? 'ogikkedennerolleheller',
+    applicationRead: process.env.APP_ROLE_APPLICATION_READ ?? 'ogikkedennerolleheller'
   },
   validUpnSuffix: process.env.VALID_UPN_SUFFIX || '@blublipp.no',
   leaderLevel: process.env.LEADER_LEVEL || 2,
@@ -48,5 +48,9 @@ module.exports = {
     },
     secret: process.env.MAIL_SECRET || 'blubbubji',
     url: process.env.MAIL_URL || 'fhodsfjlkdsnvnnvdfk.no/mailert'
+  },
+  krr: {
+    url: process.env.KRR_URL || 'fitnintinintininttullballmakkverk.no',
+    secret: process.env.KRR_JWT_SECRET || 'dette er så hemmelig så hemmelig altså!'
   }
 }
