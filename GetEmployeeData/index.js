@@ -94,7 +94,7 @@ module.exports = async function (context, req) {
     logger('info', [ver.appid, `Could not find competencedata for ${employeeUpn}`])
     return {
       status: 200,
-      body: repackCompetence({ navn: `Fant ansatt ${employee.navn}, men ansatt har ikke fylt ut kompetanse på https://kompetanse.vtfk.no`, fodselsnummer: employee.fodselsnummer}, null, krr)
+      body: repackCompetence({ navn: `Fant ansatt ${employee.navn}, men ansatt har ikke fylt ut kompetanse på https://kompetanse.vtfk.no`, fodselsnummer: employee.fodselsnummer, aktiveArbeidsforhold: employee.aktiveArbeidsforhold }, null, krr)
     }
   }
 
