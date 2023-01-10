@@ -21,7 +21,6 @@ module.exports = async function (context, req) {
   const verUpn = verifyUpn(req.headers.authorization)
   if (!verUpn) return { status: 401, body: 'You are not authorized to view this resource, upn suffix is not authorized' }
 
-  
   if (!verifyRoles(req.headers.authorization, [appRoles.admin, appRoles.privileged])) return { status: 401, body: 'You are not authorized to access this resource' }
 
   const db = mongo()

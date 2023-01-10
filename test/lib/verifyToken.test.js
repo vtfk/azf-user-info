@@ -2,7 +2,6 @@ const { verifyToken, verifyUpn, isLeader } = require('../../lib/verifyToken')
 const { validUpnSuffix } = require('../../config')
 const jwt = require('jsonwebtoken')
 
-
 // Verfiy token
 const validTokenWithRolesData = {
   upn: `enellerannen${validUpnSuffix}`,
@@ -20,7 +19,6 @@ const invalidUpnSuffixData = {
 const noUpnData = {
   randomStuff: 'Hhihaklk'
 }
-
 
 const validTokenWithRoles = jwt.sign(validTokenWithRolesData, 'hva som helstssss')
 const validTokenWithoutRoles = jwt.sign(validTokenWithoutRolesData, 'hva som helstssss')
@@ -61,7 +59,7 @@ const validUpnTokenData = {
 }
 
 const invalidUpnTokenData = {
-  upn: `enellerannen@balla.no`
+  upn: 'enellerannen@balla.no'
 }
 
 const validUpnToken = jwt.sign(validUpnTokenData, 'hva som helstssss')
@@ -83,7 +81,7 @@ describe('Check that verifyUpn returns as expected, when', () => {
 })
 
 // isLeader
-const structures = [ [ { leder: 'sjef1@jobb.no' }, { leder: 'sjef2@jobb.no' }, { leder: 'sjef3@jobb.no' }, { leder: 'sjef4@jobb.no' }, { leder: 'sjef5@jobb.no' } ], [ { leder: 'enannensjef@jobb.no' } ] ]
+const structures = [[{ leder: 'sjef1@jobb.no' }, { leder: 'sjef2@jobb.no' }, { leder: 'sjef3@jobb.no' }, { leder: 'sjef4@jobb.no' }, { leder: 'sjef5@jobb.no' }], [{ leder: 'enannensjef@jobb.no' }]]
 
 const isLeaderLevel1 = {
   upn: 'sjef1@jobb.no'

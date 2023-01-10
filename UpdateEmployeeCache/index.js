@@ -5,7 +5,6 @@ const switchMainCollection = require('../lib/switchMainCollection')
 const { logger } = require('@vtfk/logger')
 const mongo = require('../lib/mongo')
 
-
 module.exports = async function (context, myTimer) {
   try {
     await logger('info', 'Starting updateEmployeeCache')
