@@ -29,7 +29,8 @@ module.exports = {
     orgStructuredCollection: process.env.MONGO_DB_ORG_STRUCTURED_COLLECTION ?? 'jauddaaa',
     competenceCollection: process.env.MONGO_DB_COMPETENCE_COLLECTION ?? 'jauddaaa',
     reportCollection: process.env.MONGO_DB_REPORT_COLLECTION ?? 'jauddaaa',
-    settingsCollection: process.env.MONGO_DB_SETTINGS_COLLECTION ?? 'jauddaaa'
+    settingsCollection: process.env.MONGO_DB_SETTINGS_COLLECTION ?? 'jauddaaa',
+    criticalTasksCollection: process.env.MONGO_DB_CRITICALTASKS_COLLECTION ?? 'jauddaaa'
   },
   deleteAfterInactiveDays: process.env.DELETE_AFTER_INACTIVE_DAYS ?? 90,
   mock: !!(process.env.MOCK && process.env.MOCK === 'true'),
