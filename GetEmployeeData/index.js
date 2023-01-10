@@ -7,7 +7,7 @@ const repackCompetence = require('../lib/repackCompetence')
 
 module.exports = async function (context, req) {
   logConfig({
-    prefix: 'azf-user-info - CreateEmployeeReport',
+    prefix: 'azf-user-info - GetEmployeeData',
     azure: {
       context,
       excludeInvocationId: true
@@ -59,7 +59,7 @@ module.exports = async function (context, req) {
     logger('info', [ver.appid, `Could not find employee for ${employeeUpn}`])
     return {
       status: 200,
-      body: repackCompetence({ navn: `Fant ingen ansatt med brukernavn: ${employeeUpn}` })
+      body: repackCompetence({ msg: `Fant ingen ansatt med brukernavn: ${employeeUpn}` }, null, null, false)
     }
   }
 
@@ -81,7 +81,7 @@ module.exports = async function (context, req) {
     logger('info', [ver.appid, `${managerUpn} is NOT manager for ${employeeUpn}, will not return employeeData`])
     return {
       status: 200,
-      body: repackCompetence({ navn: `Du er ikke registrert som leder for ${employee.navn}, og får derfor ikke hente data fra kompetansemodulen`, fodselsnummer: null }, null, krr)
+      body: repackCompetence({ navn: employee.navn, msg: `Du er ikke registrert som leder for ${employee.navn}, og får derfor ikke hente data fra kompetansemodulen`, fodselsnummer: null }, null, krr, false)
     }
   }
 
@@ -94,13 +94,13 @@ module.exports = async function (context, req) {
     logger('info', [ver.appid, `Could not find competencedata for ${employeeUpn}`])
     return {
       status: 200,
-      body: repackCompetence({ navn: `Fant ansatt ${employee.navn}, men ansatt har ikke fylt ut kompetanse på https://kompetanse.vtfk.no`, fodselsnummer: employee.fodselsnummer, aktiveArbeidsforhold: employee.aktiveArbeidsforhold }, null, krr)
+      body: repackCompetence({ ...employee, msg: `Fant ansatt ${employee.navn}, men ansatt har ikke fylt ut kompetanse på https://kompetanse.vtfk.no` }, null, krr, true)
     }
   }
 
   logger('info', [ver.appid, `${managerUpn} is manager for ${employeeUpn}, will return employeeData`])
 
-  const result = repackCompetence(employee, competence, krr)
+  const result = repackCompetence(employee, competence, krr, true)
 
   return { status: 200, body: result }
 }
