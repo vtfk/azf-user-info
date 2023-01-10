@@ -16,10 +16,10 @@ const employeeProjection = {
   'aktiveArbeidsforhold.arbeidssted.navn': 1,
   'aktiveArbeidsforhold.arbeidssted.kortnavn': 1,
   'aktiveArbeidsforhold.hovedstilling': 1,
-  'mandatoryCompetenceInput': 1
+  mandatoryCompetenceInput: 1
 }
 
-const mapReportData = ( raw ) => {
+const mapReportData = (raw) => {
   const hovedstilling = raw.aktiveArbeidsforhold.find(stilling => stilling.hovedstilling)
   const tilleggstillinger = raw.aktiveArbeidsforhold.filter(stilling => !stilling.hovedstilling)
   let keyTasks = []
@@ -54,7 +54,6 @@ const mapReportData = ( raw ) => {
   return repacked
 }
 
-
 const competenceProjection = {
   _id: 0,
   fodselsnummer: 1,
@@ -68,20 +67,19 @@ const competenceProjection = {
   perfCounty: 1
 }
 
-
 const getRandomInt = (min, max) => {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min) + min) // The maximum is exclusive and the minimum is inclusive
 }
 
 const mockCompetence = () => {
-  const randomDegree = getRandomInt(0,4)
-  const randomSubject = getRandomInt(0,4)
-  const randomTask = getRandomInt(0,4)
-  const randomPosition = getRandomInt(0,4)
-  const randomSoloRole = getRandomInt(0,2)
-  const randomPreferredCounty = getRandomInt(0,4)
+  const randomDegree = getRandomInt(0, 4)
+  const randomSubject = getRandomInt(0, 4)
+  const randomTask = getRandomInt(0, 4)
+  const randomPosition = getRandomInt(0, 4)
+  const randomSoloRole = getRandomInt(0, 2)
+  const randomPreferredCounty = getRandomInt(0, 4)
   const degrees = ['master', 'bachelor', 'videregående skole', 'fagbrev']
   const subjects = ['Vin', 'øl', 'Matte', 'Norsk']
   const tasks = [['Hoppe tau', 'Lage mat', 'Kjøre bil'], ['Klage', 'syte', 'Drikke kaffe'], ['Synge litt', 'Danse litt', 'Sette seg litt ned'], ['Power bi problemer', 'Lage for mye statistikk', 'UNne seg noe godt']]
@@ -95,33 +93,33 @@ const mockCompetence = () => {
         subject: subjects[randomSubject],
         fromYear: 2019,
         toYear: 2022,
-        "fromMonth": "Januar",
-        "toMonth": "Februar",
-        "school": "Livets harde skole"
+        fromMonth: 'Januar',
+        toMonth: 'Februar',
+        school: 'Livets harde skole'
       }
     ],
     tasks: tasks[randomTask],
     workExperience: [
       {
-        "fromYear": 2019,
-        "toYear": 2022,
-        "fromMonth": "Januar",
-        "toMonth": "Februar",
-        "tasks": [
-            "Løpe",
-            "Sykle",
-            "Skape overskrifter i TA",
-            "",
-            ""
+        fromYear: 2019,
+        toYear: 2022,
+        fromMonth: 'Januar',
+        toMonth: 'Februar',
+        tasks: [
+          'Løpe',
+          'Sykle',
+          'Skape overskrifter i TA',
+          '',
+          ''
         ],
-        "position": positions[randomPosition],
-        "sector": "Privat",
-        "employer": "Arbeidsgiver AS"
+        position: positions[randomPosition],
+        sector: 'Privat',
+        employer: 'Arbeidsgiver AS'
       }
     ],
     other: {
-      "soloRole": soloRoles[randomSoloRole],
-      "soloRoleDescription": "Lage solobrus, og lage mat til hunder på gata"
+      soloRole: soloRoles[randomSoloRole],
+      soloRoleDescription: 'Lage solobrus, og lage mat til hunder på gata'
     },
     perfCounty: preferredCounties[randomPreferredCounty]
   }
@@ -135,7 +133,7 @@ const defaultCompetence = {
   workExperience: [],
   other: {
     soloRole: null,
-    soloRoleDescription: null,
+    soloRoleDescription: null
   },
   experience: [],
   certifications: [],
@@ -190,7 +188,6 @@ module.exports = async function (context, myTimer) {
     await logger('info', ['Updating report blob storage with new data'])
     const createResult = await save('reportData.json', JSON.stringify(res, null, 2))
     await logger('info', ['Successfully created new report data blob', createResult])
-
   } catch (error) {
     await logger('error', error.message)
   }

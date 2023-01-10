@@ -22,20 +22,19 @@ const orgProjection = {
   'arbeidsforhold.hovedstilling': 1,
   'arbeidsforhold.stillingsnummer': 1,
   'arbeidsforhold.stillingstittel': 1,
-  'arbeidsforhold.ansettelsesprosent': 1,
   'arbeidsforhold.arbeidsforholdstype': 1,
   'arbeidsforhold.personalressurskategori': 1,
   'arbeidsforhold.officeLocation': 1,
   'arbeidsforhold.arbeidssted.struktur': 1,
-  'arbeidsforhold.mandatoryCompetenceInput': 1,
+  'arbeidsforhold.mandatoryCompetenceInput': 1
 }
 
 const allProjection = {
   _id: 0,
   organisasjonsId: 1,
   navn: 1,
-  "leder.userPrincipalName": 1,
-  "overordnet.organisasjonsId": 1,
+  'leder.userPrincipalName': 1,
+  'overordnet.organisasjonsId': 1,
   underordnet: 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
@@ -48,19 +47,19 @@ const allSmallProjection = {
   _id: 0,
   organisasjonsId: 1,
   navn: 1,
-  "leder.ansattnummer": 1,
-  "leder.navn": 1,
+  'leder.ansattnummer': 1,
+  'leder.navn': 1,
   underordnet: 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.ansattnummer': 1,
-  'arbeidsforhold.stillingstittel': 1,
+  'arbeidsforhold.stillingstittel': 1
 }
 
 const reportProjection = {
   _id: 0,
   organisasjonsId: 1,
   navn: 1,
-  "leder.userPrincipalName": 1,
+  'leder.userPrincipalName': 1,
   underordnet: 1,
   'arbeidsforhold.arbeidssted.struktur': 1,
   'arbeidsforhold.userPrincipalName': 1,
@@ -72,8 +71,8 @@ const allAdminProjection = {
   _id: 0,
   organisasjonsId: 1,
   navn: 1,
-  "leder.userPrincipalName": 1,
-  "overordnet.organisasjonsId": 1,
+  'leder.userPrincipalName': 1,
+  'overordnet.organisasjonsId': 1,
   underordnet: 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
@@ -88,19 +87,19 @@ const taskProjection = {
 const determineParam = (param) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
   if (!isNaN(param) || param === 'hoved') { // orgid
-    return { query:  { 'organisasjonsId': param }, searchProjection: orgProjection, type: 'unique' }
+    return { query: { organisasjonsId: param }, searchProjection: orgProjection, type: 'unique' }
   } else if (emailRegex.test(param)) {
-    return { query: { $or: [ { 'arbeidsforhold.userPrincipalName': param }, {'leder.userPrincipalName': param } ] }, searchProjection: orgProjection, type: 'unique' }
+    return { query: { $or: [{ 'arbeidsforhold.userPrincipalName': param }, { 'leder.userPrincipalName': param }] }, searchProjection: orgProjection, type: 'unique' }
   } else if (param.toLowerCase() === 'all') {
     return { query: {}, searchProjection: allProjection, type: 'all' }
   } else if (param.toLowerCase() === 'alladmin') {
     return { query: {}, searchProjection: allAdminProjection, type: 'allAdmin' }
   } else if (param.toLowerCase() === 'allsmall') {
     return { query: {}, searchProjection: allSmallProjection, type: 'allSmall' }
-  } else if (param.toLowerCase().substring(0,6) === 'report') {
+  } else if (param.toLowerCase().substring(0, 6) === 'report') {
     return { query: {}, searchProjection: reportProjection, type: 'report', orgId: param.substring(7, param.length) }
   } else {
-    return { query: { navn: {'$regex' : param, '$options' : 'i'} }, searchProjection: orgProjection, type: 'search' }
+    return { query: { navn: { $regex: param, $options: 'i' } }, searchProjection: orgProjection, type: 'search' }
   }
 }
 
@@ -153,8 +152,8 @@ module.exports = async function (context, req) {
   const { query, searchProjection, type, orgId } = determineParam(req.params.param)
   logger('info', [ver.upn, query, type])
 
-  let isAdmin = ver.roles.includes(appRoles.admin)
-  if (type === 'allAdmin' && !isAdmin) return { status: 401, body: `You are not authorized to view this resource, you do not have admin role` }
+  const isAdmin = ver.roles.includes(appRoles.admin)
+  if (type === 'allAdmin' && !isAdmin) return { status: 401, body: 'You are not authorized to view this resource, you do not have admin role' }
 
   const db = mongo()
   let collection = db.collection(mongoDB.orgCollection)
@@ -171,13 +170,13 @@ module.exports = async function (context, req) {
       }
       const competenceProjection = {
         _id: 0,
-        "other.soloRole": 1,
+        'other.soloRole': 1,
         perfCounty: 1,
         positionTasks: 1,
         userPrincipalName: 1
       }
       collection = db.collection(mongoDB.competenceCollection)
-      const competence =  await collection.find({}).project(competenceProjection).toArray()
+      const competence = await collection.find({}).project(competenceProjection).toArray()
       org = org.map(unit => {
         const leader = allEmployees.find(l => l.userPrincipalName === unit.leder.userPrincipalName)
         const leaderCompetence = competence.find(c => c.userPrincipalName === unit.leder.userPrincipalName)
@@ -216,7 +215,7 @@ module.exports = async function (context, req) {
       logger('info', [ver.upn, `checked if leader within level ${leaderLevel} for orgId: ${orgId} - result`, leaderPrivilege])
       privileged = privileged || leaderPrivilege
 
-      if (!privileged) return { status: 401, body: `You are not authorized to view this resource` }
+      if (!privileged) return { status: 401, body: 'You are not authorized to view this resource' }
 
       // Clear up stuff
       org = org.map(unit => {
@@ -238,7 +237,7 @@ module.exports = async function (context, req) {
           currentChild.arbeidsforhold = currentChild.arbeidsforhold.filter(emp => !employees.includes(emp.userPrincipalName))
           employees.push(...(currentChild.arbeidsforhold.map(emp => emp.userPrincipalName)))
           res.push(currentChild)
-          childrenUnits = [ ...childrenUnits, ...currentChild.underordnet ]
+          childrenUnits = [...childrenUnits, ...currentChild.underordnet]
         }
         childrenUnits = childrenUnits.slice(1, childrenUnits.length)
       }
@@ -246,12 +245,12 @@ module.exports = async function (context, req) {
       // Get report competence data
       const competenceProjection = {
         _id: 0,
-        "other.soloRole": 1,
+        'other.soloRole': 1,
         perfCounty: 1,
         userPrincipalName: 1
       }
       collection = db.collection(mongoDB.competenceCollection)
-      const competence =  await collection.find({}).project(competenceProjection).toArray()
+      const competence = await collection.find({}).project(competenceProjection).toArray()
 
       // Repack result
       res = res.map(unit => {
@@ -263,7 +262,7 @@ module.exports = async function (context, req) {
             mandatoryCompetenceInput: forhold.mandatoryCompetenceInput,
             officeLocation: forhold.officeLocation,
             soloRole: comp?.other?.soloRole ?? null,
-            perfCounty: comp?.perfCounty ?? null,
+            perfCounty: comp?.perfCounty ?? null
           }
         })
         return unit
@@ -271,13 +270,13 @@ module.exports = async function (context, req) {
 
       return { status: 200, body: res }
     }
-    
+
     // If several returned - quick return result
     if (org.length > 1) { return { status: 200, body: repackArbeidsforhold(org) } }
 
     // If none returned - quick return empty array
     if (org.length === 0) { return { status: 200, body: [] } }
-    
+
     collection = db.collection(mongoDB.competenceCollection)
     const posTasks = await collection.find({}).project(taskProjection).toArray()
     let orgRes = org.map(unit => {
@@ -286,7 +285,7 @@ module.exports = async function (context, req) {
         arbeidsforhold: unit.arbeidsforhold.map(forhold => {
           return {
             ...forhold,
-            tasks: posTasks.find(posTask => posTask.positionTasks.find(pos => getPositionId(pos.positionId) === getPositionId(forhold.systemId)))?.positionTasks.find(task => getPositionId(task.positionId) === getPositionId(forhold.systemId))?.tasks ?? [] 
+            tasks: posTasks.find(posTask => posTask.positionTasks.find(pos => getPositionId(pos.positionId) === getPositionId(forhold.systemId)))?.positionTasks.find(task => getPositionId(task.positionId) === getPositionId(forhold.systemId))?.tasks ?? []
           }
         })
       }
@@ -301,12 +300,12 @@ module.exports = async function (context, req) {
 
     const competenceProjection = {
       _id: 0,
-      "other.soloRole": 1,
-      "other.soloRoleDescription": 1,
+      'other.soloRole': 1,
+      'other.soloRoleDescription': 1,
       perfCounty: 1,
       userPrincipalName: 1
     }
-    const competence =  await collection.find({}).project(competenceProjection).toArray()
+    const competence = await collection.find({}).project(competenceProjection).toArray()
     orgRes = orgRes.map(unit => {
       return {
         ...unit,

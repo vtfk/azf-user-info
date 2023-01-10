@@ -25,10 +25,10 @@ module.exports = async function (context, req) {
   const query = {
     $or: [
       {
-        'aktiveArbeidsforhold.1': { '$exists': true }
+        'aktiveArbeidsforhold.1': { $exists: true }
       },
       {
-        'tidligereArbeidsforhold.1': { '$exists': true }
+        'tidligereArbeidsforhold.1': { $exists: true }
       }
     ]
   }
