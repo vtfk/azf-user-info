@@ -17,6 +17,7 @@ const orgProjection = {
   'arbeidsforhold.systemId': 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
+  'arbeidsforhold.ansattnummer': 1,
   'arbeidsforhold.ansettelsesprosent': 1,
   'arbeidsforhold.lonnsprosent': 1,
   'arbeidsforhold.hovedstilling': 1,
@@ -61,6 +62,7 @@ const reportProjection = {
   navn: 1,
   'leder.userPrincipalName': 1,
   underordnet: 1,
+  'arbeidsforhold.ansattnummer': 1,
   'arbeidsforhold.arbeidssted.struktur': 1,
   'arbeidsforhold.userPrincipalName': 1,
   'arbeidsforhold.mandatoryCompetenceInput': 1,
@@ -259,6 +261,7 @@ module.exports = async function (context, req) {
         unit.arbeidsforhold = unit.arbeidsforhold.map(forhold => {
           const comp = competence.find(c => c.userPrincipalName === forhold.userPrincipalName)
           return {
+            ansattnummer: forhold.ansattnummer,
             mandatoryCompetenceInput: forhold.mandatoryCompetenceInput,
             officeLocation: forhold.officeLocation,
             soloRole: comp?.other?.soloRole ?? null,
@@ -268,7 +271,20 @@ module.exports = async function (context, req) {
         return unit
       })
 
-      return { status: 200, body: res }
+      // Get critical tasks from collection
+      // Get all employeeNumbers for report
+      let employeeNumbers = []
+      for (const unit of res) {
+        const empNumbers = unit.arbeidsforhold.map(forhold => forhold.ansattnummer)
+        employeeNumbers = employeeNumbers.concat(empNumbers)
+      }
+
+      // Get critical tasks for employeeNumbers
+      const criticalQuery = { ansattnummer: { $in: employeeNumbers } }
+      collection = db.collection(mongoDB.criticalTasksCollection)
+      const criticalTasks = await collection.find(criticalQuery).project({ _id: 0 }).toArray()
+
+      return { status: 200, body: { report: res, criticalTasks } }
     }
 
     // If several returned - quick return result
