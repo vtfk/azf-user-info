@@ -4,10 +4,8 @@
       "authLevel": "function",
       "type": "httpTrigger",
       "direction": "in",
-      "route": "CriticalTask/{param}",
       "name": "req",
       "methods": [
-        "get",
         "post"
       ]
     },
