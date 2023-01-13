@@ -57,10 +57,15 @@ module.exports = async function (context, req) {
       }
     })
 
-    if (bulkOperation.length === 0) return { status: 200, body: 'Ingen endringer' }
+    // If changes - update in db
+    if (bulkOperation.length > 0) {
+      const upsertRes = await collection.bulkWrite(bulkOperation)
+    }
 
-    const upsertRes = await collection.bulkWrite(bulkOperation)
-    return { status: 200, body: upsertRes }
+    // Get all again
+    const newCriticalTasks = await collection.find(criticalQuery).project({ _id: 0 }).toArray()
+
+    return { status: 200, body: newCriticalTasks }
   } catch (error) {
     return { status: 500, body: error.message }
   }
