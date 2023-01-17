@@ -85,6 +85,13 @@ module.exports = async function (context, req) {
     }
   }
 
+  // Sjekker om det er opprettet tidligere kartleggingssamtaler, og henter saksnummer for P360
+  logger('info', [ver.appid, `Fetching caseNumber for employee ${employee.userPrincipalName}`])
+  collection = db.collection(mongoDB.acosReportCollection)
+  query = { ssn: employee.fodselsnummer }
+  const caseNumber = await collection.findOne(query)
+  employee.caseNumber = caseNumber?.caseNumber ?? null
+
   // ManagerUpn er leder for employeeUpn innen nivå leaderLevel, da henter vi kompetansedata og sender tilbake
   collection = db.collection(mongoDB.competenceCollection)
   query = { fodselsnummer: employee.fodselsnummer }
