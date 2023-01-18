@@ -88,7 +88,7 @@ module.exports = async function (context, req) {
   // Sjekker om det er opprettet tidligere kartleggingssamtaler, og henter saksnummer for P360
   logger('info', [ver.appid, `Fetching caseNumber for employee ${employee.userPrincipalName}`])
   collection = db.collection(mongoDB.acosReportCollection)
-  query = { ssn: employee.fodselsnummer }
+  query = { ssn: employee.fodselsnummer, $or: [{ type: "kartleggingssamtale-out" }, { type: "kartleggingssamtale-in" }] }
   const caseNumber = await collection.findOne(query)
   employee.caseNumber = caseNumber?.caseNumber ?? null
 

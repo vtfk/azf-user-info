@@ -96,10 +96,19 @@ module.exports = async function (context, req) {
       res.competenceData = competenceData[0]
       delete res.competenceData.fodselsnummer
     }
-    delete res.fodselsnummer
   } catch (error) {
     logger('error', [ver.upn, error.message])
     return { status: 500, body: error.message }
   }
+
+  // Expand with kartleggingssamtale-data as well
+  logger('info', [ver.upn, `Fetching kartleggingssamtaler for employee ${res.userPrincipalName}`])
+  collection = db.collection(mongoDB.acosReportCollection)
+  const kartleggingQuery = { ssn: res.fodselsnummer, $or: [{ type: "kartleggingssamtale-out" }, { type: "kartleggingssamtale-in" }] }
+  const kartleggingsSamtaler = await collection.find(kartleggingQuery).project({ _id: 0, specialNeeds: 0, ssn: 0 }).toArray()
+
+  res.kartleggingsSamtaler = kartleggingsSamtaler
+  delete res.fodselsnummer
+
   return { status: 200, body: [{ ...res, isPrivileged: true }] }
 }
