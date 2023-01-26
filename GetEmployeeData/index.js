@@ -1,5 +1,5 @@
 const mongo = require('../lib/mongo')
-const { mongoDB, appRoles, leaderLevel } = require('../config')
+const { mongoDB, appRoles, leaderLevel, kartleggingExceptions } = require('../config')
 const { verifyAppToken } = require('../lib/verifyToken')
 const { logger, logConfig } = require('@vtfk/logger')
 const lookupKrr = require('../lib/lookupKrr')
@@ -69,7 +69,7 @@ module.exports = async function (context, req) {
   logger('info', [ver.appid, `Found employeeData for ${employeeUpn}, checking if ${managerUpn} is manager`
   ])
 
-  // Vi går gjennom strukrurer for aktive arbeidsforhold - sjekker om managerUpn ligger i maks nivå "variabel" som leder for den ansatte
+  // Vi går gjennom strukturer for aktive arbeidsforhold - sjekker om managerUpn ligger i maks nivå "variabel" som leder for den ansatte
   let isLeader = false
   for (const forhold of employee.aktiveArbeidsforhold) {
     const leaders = forhold.arbeidssted.struktur
@@ -78,7 +78,14 @@ module.exports = async function (context, req) {
     if (leaders.includes(managerUpn)) isLeader = true
   }
   if (!isLeader) {
-    logger('info', [ver.appid, `${managerUpn} is NOT manager for ${employeeUpn}, will not return employeeData`])
+    logger('info', [ver.appid, `${managerUpn} is NOT manager for ${employeeUpn}, checking exception object`])
+    if (kartleggingExceptions[managerUpn] && kartleggingExceptions[managerUpn].includes(employeeUpn)) {
+      logger('info', [ver.appid, `${managerUpn} has exception for ${employeeUpn}, will return employee data`])
+      isLeader = true
+    }
+  }
+  if (!isLeader) {
+    logger('info', [ver.appid, `${managerUpn} is NOT manager and do not have exception for ${employeeUpn}, will not return employeeData`])
     return {
       status: 200,
       body: repackCompetence({ navn: employee.navn, msg: `Du er ikke registrert som leder for ${employee.navn}, og får derfor ikke hente data fra kompetansemodulen`, fodselsnummer: null }, null, krr, false)

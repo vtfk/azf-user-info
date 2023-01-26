@@ -2,6 +2,18 @@ if (process.env.DEV_MODE) {
   require('dotenv').config()
 }
 
+const createKartleggingException = (str) => {
+  const exceptions = {}
+  const entries = str.split(';')
+  for (const entry of entries) {
+    const exception = entry.split(':')
+    const leader = exception[0]
+    const employees = exception[1].split(',')
+    exceptions[leader] = employees
+  }
+  return exceptions
+}
+
 module.exports = {
   fintClient: {
     clientId: process.env.FINT_CLIENT_ID ?? 'superId',
@@ -54,5 +66,6 @@ module.exports = {
   krr: {
     url: process.env.KRR_URL || 'fitnintinintininttullballmakkverk.no',
     secret: process.env.KRR_JWT_SECRET || 'dette er så hemmelig så hemmelig altså!'
-  }
+  },
+  kartleggingExceptions: process.env.KARTLEGGING_EXCEPTIONS && createKartleggingException(process.env.KARTLEGGING_EXCEPTIONS) || {}
 }
