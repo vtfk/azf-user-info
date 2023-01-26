@@ -1,6 +1,6 @@
 {
   "name": "azf-user-info",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Api for getting user info from cached users",
   "scripts": {
     "test": "jest --verbose",
