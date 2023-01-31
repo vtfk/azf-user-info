@@ -110,7 +110,7 @@ module.exports = async function (context, req) {
 
     let isLeader = false
 
-    if (innplasseringExceptions[managerUpn] && kartleggingExceptions[managerUpn].includes(employeeUpn)) {
+    if (innplasseringExceptions[managerUpn] && innplasseringExceptions[managerUpn].includes(employeeUpn)) {
       logger('info', [ver.appid, `Innplassering - ${managerUpn} has exception for ${employeeUpn}, will return employee data`])
       isLeader = true
     }
