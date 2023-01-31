@@ -43,7 +43,9 @@ module.exports = {
     reportCollection: process.env.MONGO_DB_REPORT_COLLECTION ?? 'jauddaaa',
     settingsCollection: process.env.MONGO_DB_SETTINGS_COLLECTION ?? 'jauddaaa',
     criticalTasksCollection: process.env.MONGO_DB_CRITICALTASKS_COLLECTION ?? 'jauddaaa',
-    acosReportCollection: process.env.MONGO_DB_ACOS_REPORT_COLLECTION ?? 'huhiukjdlkfsdskjf'
+    acosReportCollection: process.env.MONGO_DB_ACOS_REPORT_COLLECTION ?? 'huhiukjdlkfsdskjf',
+    telemarkOrgCollection: process.env.MONGO_DB_TELEMARK_ORG_COLLECTION ?? 'huhiukjdlkfsdskjf',
+    vestfoldOrgCollection: process.env.MONGO_DB_VESTFOLD_ORG_COLLECTION ?? 'huhiukjdlkfsdskjf',
   },
   deleteAfterInactiveDays: process.env.DELETE_AFTER_INACTIVE_DAYS ?? 90,
   mock: !!(process.env.MOCK && process.env.MOCK === 'true'),
@@ -67,5 +69,6 @@ module.exports = {
     url: process.env.KRR_URL || 'fitnintinintininttullballmakkverk.no',
     secret: process.env.KRR_JWT_SECRET || 'dette er så hemmelig så hemmelig altså!'
   },
-  kartleggingExceptions: process.env.KARTLEGGING_EXCEPTIONS && createKartleggingException(process.env.KARTLEGGING_EXCEPTIONS) || {}
+  kartleggingExceptions: process.env.KARTLEGGING_EXCEPTIONS && createKartleggingException(process.env.KARTLEGGING_EXCEPTIONS) || {},
+  innplasseringExceptions: process.env.INNPLASSERING_EXCEPTIONS && createKartleggingException(process.env.INNPLASSERING_EXCEPTIONS) || {}
 }
