@@ -34,14 +34,18 @@ const allProjection = {
   _id: 0,
   organisasjonsId: 1,
   navn: 1,
+  kortnavn: 1,
   'leder.userPrincipalName': 1,
+  'leder.navn': 1,
+  'leder.ansattnummer': 1,
   'overordnet.organisasjonsId': 1,
   underordnet: 1,
   'arbeidsforhold.navn': 1,
   'arbeidsforhold.userPrincipalName': 1,
   'arbeidsforhold.stillingstittel': 1,
   'arbeidsforhold.personalressurskategori': 1,
-  'arbeidsforhold.arbeidsforholdsperiode': 1
+  'arbeidsforhold.arbeidsforholdsperiode': 1,
+  'arbeidsforhold.ansattnummer': 1
 }
 
 const allSmallProjection = {
