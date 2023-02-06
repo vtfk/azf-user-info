@@ -125,6 +125,13 @@ module.exports = async function (context, req) {
       }
     }
 
+    // Sjekker om det er opprettet tidligere innplasseringssamtale, og henter saksnummer for P360
+    logger('info', [ver.appid, `Fetching caseNumber for employee ${employee.userPrincipalName}`])
+    collection = db.collection(mongoDB.acosReportCollection)
+    query = { ssn: employee.fodselsnummer, $or: [{ type: "innplasseringssamtale" }] }
+    const caseNumber = await collection.findOne(query)
+    employee.caseNumber = caseNumber?.caseNumber ?? null
+
     logger('info', [ver.appid, `Innplassering - ${managerUpn} is manager or has exception for ${employeeUpn}, will return employeeData`])
     return {
       status: 200,
