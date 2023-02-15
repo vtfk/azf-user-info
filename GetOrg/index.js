@@ -45,6 +45,8 @@ const allProjection = {
   'arbeidsforhold.stillingstittel': 1,
   'arbeidsforhold.personalressurskategori': 1,
   'arbeidsforhold.arbeidsforholdsperiode': 1,
+  'arbeidsforhold.arbeidsforholdstype': 1,
+  'arbeidsforhold.hovedstilling': 1,
   'arbeidsforhold.ansattnummer': 1
 }
 
