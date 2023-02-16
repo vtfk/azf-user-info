@@ -84,7 +84,7 @@ module.exports = async function (context, req) {
     const collection = db.collection(chooseCollection(county))
     const insertRes = await collection.insertOne(unit)
 
-    return { status: 200, body: insertRes }
+    return { status: 200, body: { insertRes, organisasjonsId: unit.organisasjonsId } }
   }
 
   if (method === 'setManager') {
@@ -108,7 +108,7 @@ module.exports = async function (context, req) {
     collection = db.collection(chooseCollection(county))
     const updateRes = await collection.updateOne({organisasjonsId: organisasjonsId}, { $set: { [type]: manager } })
     
-    return { status: 200, body: updateRes }
+    return { status: 200, body: { updateRes, organisasjonsId } }
   }
 
   if (method === 'updateUnit') {
@@ -143,7 +143,7 @@ module.exports = async function (context, req) {
     }
     const updateRes = await collection.updateOne({ organisasjonsId: organisasjonsId }, { $set: { arbeidsforhold: newArbeidsforhold } })
     
-    return { status: 200, body: updateRes }
+    return { status: 200, body: { updateRes, organisasjonsId } }
   }
 
   if (method === 'handleUnderordnet') {
@@ -180,6 +180,6 @@ module.exports = async function (context, req) {
     }
     const updateUnderordnetRes = await collection.updateOne({ organisasjonsId: underordnet }, { $set: { overordnet: overordnetToAdd } })
 
-    return { status: 200, body: { updateUnitRes, updateUnderordnetRes } }
+    return { status: 200, body: { updateUnitRes, updateUnderordnetRes, organisasjonsId, underordnet } }
   }
 }
