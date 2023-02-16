@@ -106,6 +106,8 @@ const determineParam = (param) => {
     return { query: {}, searchProjection: allSmallProjection, type: 'allSmall' }
   } else if (param.toLowerCase().substring(0, 6) === 'report') {
     return { query: {}, searchProjection: reportProjection, type: 'report', orgId: param.substring(7, param.length) }
+  } else if (param.toLowerCase() === 'newcounties') {
+    return { query: {}, searchProjection: allProjection, type: 'newCounties' }
   } else {
     return { query: { navn: { $regex: param, $options: 'i' } }, searchProjection: orgProjection, type: 'search' }
   }
@@ -167,6 +169,55 @@ module.exports = async function (context, req) {
   let collection = db.collection(mongoDB.orgCollection)
 
   try {
+    // First newCounties method
+    if (type === 'newCounties') {
+      // Get Acos reports with innplasseringsdata
+      collection = db.collection(mongoDB.acosReportCollection)
+      const innplasseringsdata = await collection.find( { type: 'innplasseringssamtale' } ).toArray()
+      
+      // Get new counties where caller is leader or temp leader
+      const newCountyQuery = { $or: [{ "leder.userPrincipalName": ver.upn }, { "midlertidigLeder.userPrincipalName": ver.upn }] }
+      collection = db.collection(mongoDB.vestfoldOrgCollection)
+      const vestfold = await collection.find(newCountyQuery).toArray()
+
+      collection =  db.collection(mongoDB.telemarkOrgCollection)
+      const telemark = await collection.find(newCountyQuery).toArray()
+
+      // Finn innplasseringsdata for alle ansatte som lederen har tilgang på - slå sammen med ansattobjektene
+      const leaderResult = {
+        vestfold: vestfold.forEach(unit => {
+          unit.arbeidsforhold = unit.arbeidsforhold.filter(emp => emp.userPrincipalName !== ver.upn) // Remove leader - should innplassere itself
+          unit.arbeidsforhold = unit.arbeidsforhold.map(emp => {
+            const innplassering = innplasseringsdata.find(employee => employee.ansattnummer === emp.ansattnummer) // Find corresponding innplasseringsdata
+            return {  
+              ...emp,
+              innplassering: innplassering ?? null
+            }
+          })
+        }),
+        telemark: telemark.forEach(unit => {
+          unit.arbeidsforhold = unit.arbeidsforhold.filter(emp => emp.userPrincipalName !== ver.upn) // Remove leader - should innplassere itself
+          unit.arbeidsforhold = unit.arbeidsforhold.map(emp => {
+            const innplassering = innplasseringsdata.find(employee => employee.employeeNumber === emp.ansattnummer) // Find corresponding innplasseringsdata
+            return {  
+              ...emp,
+              innplassering: innplassering ?? null
+            }
+          })
+        })
+      }
+
+      return { status: 200, body: { vestfold, telemark } }
+      // Find where ansattnummer is leader or midlertid leder in new counties
+      // If is leader
+      // Finn alle ansatte som lederen skal innplassere
+      // Finn alle ansatte som lederen allerede har innplassert
+      // returner dette til klient
+      
+
+      // Check if ansattnummer have innplasseringssamtale - return samtale, else return null
+    }
+
     let org = await collection.find(query).project(searchProjection).toArray()
     if (type === 'all' || type === 'allSmall') return { status: 200, body: org }
 
