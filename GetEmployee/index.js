@@ -2,12 +2,16 @@ const mongo = require('../lib/mongo')
 const { mongoDB, appRoles, leaderLevel } = require('../config')
 const { verifyToken, isLeader } = require('../lib/verifyToken')
 const { logger, logConfig } = require('@vtfk/logger')
-const { employeeProjection, nameSearchProjection, filterEmployeeData, repackArbeidsforhold } = require('../lib/employee/employeeProjections')
+const { employeeProjection, nameSearchProjection, filterEmployeeData, repackArbeidsforhold, innplasseringProjection } = require('../lib/employee/employeeProjections')
 
 const determineParam = (id) => {
   const emailRegex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
   const samAccountRegex = new RegExp('[a-z]{2,3}[0-9]{4,5}')
-  if (id.length === 11 && !isNaN(id)) { // SSN
+  if (id === 'innplasseringadmin') {
+    return { query: { harAktivtArbeidsforhold: true, userPrincipalName: { $ne: null } }, searchProjection: innplasseringProjection, type: 'innplasseringadmin' }
+  } else if (id === 'innplassering') {
+    return { query: { harAktivtArbeidsforhold: true, userPrincipalName: { $ne: null } }, searchProjection: innplasseringProjection, type: 'innplassering' }
+  } else if (id.length === 11 && !isNaN(id)) { // SSN
     return { query: { fodselsnummer: id, harAktivtArbeidsforhold: true }, searchProjection: employeeProjection, type: 'unique' }
   } else if (id.length < 10 && !isNaN(id)) {
     return { query: { ansattnummer: id, harAktivtArbeidsforhold: true }, searchProjection: employeeProjection, type: 'unique' }
@@ -47,8 +51,9 @@ module.exports = async function (context, req) {
   const db = mongo()
   let collection = db.collection(mongoDB.employeeCollection)
   let res = {}
+  const limit = ['innplassering', 'innplasseringadmin'].includes(type) ? 10000 : 10
   try {
-    const employeeData = await collection.find(query).limit(10).project(searchProjection).toArray()
+    const employeeData = await collection.find(query).limit(limit).project(searchProjection).toArray()
     if (employeeData.length === 0) {
       logger('info', [ver.upn, 'No users found with', query])
       return { status: 404, body: `No users found with "${JSON.stringify(query)}"` }
@@ -60,8 +65,47 @@ module.exports = async function (context, req) {
     return { status: 500, body: error.message }
   }
 
-  if (type === 'search') {
+  if (['search', 'innplasseringadmin', 'innplassering'].includes(type)) {
     logger('info', [ver.upn, 'Using searchProjection', query, 'do not need competence data'])
+    if (type === 'innplassering') {
+      const innplasseringProjection = {
+        _id: 0,
+        timestamp: 1,
+        responsibleName: 1,
+        responsibleUpn: 1,
+        employeeNumber: 1,
+        employeeName: 1,
+        newCounty: 1,
+        newUnit: 1
+      }
+      // Hent også acos-reports for innplassering
+      collection = db.collection(mongoDB.acosReportCollection)
+      const innplasseringsReports = await collection.find({ type: "innplasseringssamtale" }).project(innplasseringProjection).toArray()
+
+      // Hent godeste hvem som har lov til å innplassere
+      collection = db.collection(mongoDB.innplasseringCollection)
+      const allowInnplassering = await collection.find({ enabled: true }).toArray()
+
+      // Finn først ansattnummer, det endrer seg ikke, men det kan upn
+      let employeeNumber = res.find(emp => emp.userPrincipalName === ver.upn)
+      if (!employeeNumber) return { status: 500, body: `Kunne ikke finne noe ansattnummer for ${ver.upn}` }
+      employeeNumber = employeeNumber.ansattnummer
+
+      // Finn innplasseringsdata for innlogget bruker
+      const innplasseringsdata = innplasseringsReports.find(report => report.employeeNumber === employeeNumber) ?? null
+      let allInnplassering = null
+      let canInnplassere = false
+      let employeeData = null
+      
+      // Dersom brukeren har lov til å innplassere - returner hele røkla på fint format
+      if (allowInnplassering.find(emp => emp.ansattnummer === employeeNumber)) {
+        allInnplassering = innplasseringsReports
+        canInnplassere = true
+        employeeData = res
+      }
+      // Dersom brukeren ikke har lov - returner kun innplasseringsdata for gjeldene bruker
+      return { status: 200, body: { innplasseringsdata, employees: employeeData, innplasseringssamtaler: allInnplassering, canInnplassere }}
+    }
     return { status: 200, body: res }
   } else if (!privileged) {
     // Check if has leader privilege

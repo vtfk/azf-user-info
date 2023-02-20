@@ -44,6 +44,7 @@ module.exports = {
     settingsCollection: process.env.MONGO_DB_SETTINGS_COLLECTION ?? 'jauddaaa',
     criticalTasksCollection: process.env.MONGO_DB_CRITICALTASKS_COLLECTION ?? 'jauddaaa',
     acosReportCollection: process.env.MONGO_DB_ACOS_REPORT_COLLECTION ?? 'huhiukjdlkfsdskjf',
+    innplasseringCollection: process.env.MONGO_DB_INNPLASSERING_COLLECTION ?? 'huhiukjdlkfsdskjf',
     telemarkOrgCollection: process.env.MONGO_DB_TELEMARK_ORG_COLLECTION ?? 'huhiukjdlkfsdskjf',
     vestfoldOrgCollection: process.env.MONGO_DB_VESTFOLD_ORG_COLLECTION ?? 'huhiukjdlkfsdskjf',
   },

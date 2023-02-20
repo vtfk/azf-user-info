@@ -20,7 +20,7 @@ module.exports = async function (context, req) {
   if (!privileged) return { status: 401, body: 'You do not have sufficient permissions to use this resource' }
 
   const db = mongo()
-  const collection = db.collection(mongoDB.settingsCollection)
+  let collection = db.collection(mongoDB.settingsCollection)
 
   if (req.method === 'GET') {
     try {
@@ -33,8 +33,28 @@ module.exports = async function (context, req) {
   } else if (req.method === 'POST') {
     try {
       logger('info', ['Trying to update settings'])
-      const upsertRes = await collection.replaceOne({ activeSetting: true }, { ...req.body, activeSetting: true }, { upsert: true })
-      return { status: 200, body: upsertRes }
+      // Innplassering
+      if (req.body.innplassering) {
+        const { ansattnummer, method, upn, name } = req.body
+        collection = db.collection(mongoDB.innplasseringCollection)
+        if (method === 'get') {
+          const innplassering = await collection.find({}).toArray()
+          return { status: 200, body: innplassering }
+        }
+        if (!ansattnummer && !method) return { status: 400, body: 'missing required params "ansattnummer" and "method"'}
+        if (method === "add") {
+          const addResult = await collection.replaceOne({ ansattnummer: ansattnummer }, { ansattnummer, upn, name, timestamp: new Date().toISOString(), enabled: true, modifiedBy: ver.upn }, { upsert: true })
+          return { status: 200, body: addResult }
+        } else if (method === "remove") {
+          const updateResult = await collection.update({ ansattnummer: ansattnummer }, { $set: { enabled: false , timestamp: new Date().toISOString(), modifiedBy: ver.upn } })
+          return { status: 200, body: updateResult }
+        }
+      // Regular settings
+      } else {
+        if (!req.body.oblig) return { status: 400, body: 'Missing required param "body"' }
+        const upsertRes = await collection.replaceOne({ activeSetting: true }, { ...req.body, activeSetting: true }, { upsert: true })
+        return { status: 200, body: upsertRes }
+      }
     } catch (error) {
       return { status: 500, body: error.message }
     }

@@ -73,14 +73,13 @@ module.exports = async function (context, req) {
   logger('info', [ver.appid, `Looking up ${employeeUpn} in KRR`])
   const krr = await lookupKrr(employee.fodselsnummer)
 
-  logger('info', [ver.appid, `Found employeeData for ${employeeUpn}, checking if ${managerUpn} is manager`, 'isInnplassering', isInnplassering])
+  logger('info', [ver.appid, `Found employeeData for ${employeeUpn}, checking if ${managerUpn} can innplassere`, 'isInnplassering', isInnplassering])
 
   if (isInnplassering) {
     /* 
     Vi har ansattdata, og KRR
-    Vi skal sjekke om den innlioggede managerUpn har rettigheter for innplasseringssamtale med den ansatte employeeUpn.
+    Vi skal sjekke om den innlioggede managerUpn har rettigheter for innplasseringssamtale.
     Hvis den har det
-      Hent hvor den ansatte er innplassert - fylke
       // Spørsmål? Må vi ha kontorplassering?? Sannynligvis fritekst
       returner
       fnr
@@ -88,57 +87,40 @@ module.exports = async function (context, req) {
       navn ansatt
       enhet i ny fylkeskommune (kanskje hente - men redigerbart??)
     */
-   // Har en collection med info på hvor ansatte er innplassert - og har collection på ny org-struktur med ledere for enhet, og hvem som kan opprette innplassering for en ny enhet
-   // Forslag fra Jørgen - lagre de nye enhetene på FINT måten, så blir konverterring enklere
 
-
-    query = { "arbeidsforhold.userPrincipalName": employeeUpn }
-    collection = db.collection(mongoDB.vestfoldOrgCollection)
-    let newUnit = await collection.findOne(query)
-    
-    if (!newUnit) {
-      collection = db.collection(mongoDB.telemarkOrgCollection)
-      newUnit = await collection.findOne(query)
-    }
-
-    logger('info', ['ny enhet', newUnit])
-
-    if (!newUnit) return {
+    // Get ansattnummer for logged in user
+    query = { "userPrincipalName": managerUpn }
+    collection = db.collection(mongoDB.employeeCollection)
+    const manager = await collection.findOne(query)
+    if (!manager) return { 
       status: 200,
-      body: repackInnplassering({ navn: employee.navn, msg: `Mangler innplasseringsdata for ${employee.navn}`, fodselsnummer: null }, null, false, false)
+      body: repackInnplassering({ navn: employee.navn, msg: `Kunne ikke finne ansattnummeret ditt i HR...`, fodselsnummer: null }, null, false, false)
     }
 
-    let isLeader = false
-
-    if (innplasseringExceptions[managerUpn] && innplasseringExceptions[managerUpn].includes(employeeUpn)) {
-      logger('info', [ver.appid, `Innplassering - ${managerUpn} has exception for ${employeeUpn}, will return employee data`])
-      isLeader = true
+    // Check if ansattnummer can do innplassering
+    query = { "ansattnummer": manager.ansattnummer }
+    collection = db.collection(mongoDB.innplasseringCollection)
+    const canInnplassere = await collection.findOne(query)
+    if (!canInnplassere || !canInnplassere.enabled) return {
+      status: 200,
+      body: repackInnplassering({ navn: employee.navn, msg: `Du har ikke rettigheter for å innplassere. Ta kontakt med HR dersom du mener dette er feil.`, fodselsnummer: null }, false, false)
     }
-
-    if (newUnit.leder?.userPrincipalName === managerUpn || newUnit.midlertidigLeder?.userPrincipalName === managerUpn) isLeader = true
-
-    if (!isLeader) {
-      logger('info', [ver.appid, `Innplassering - ${managerUpn} is NOT manager and do not have exception for ${employeeUpn}, will not return employeeData`])
-      return {
-        status: 200,
-        body: repackInnplassering({ navn: employee.navn, msg: `Du er ikke registrert som ny leder eller midlertid leder for ${employee.navn}`, fodselsnummer: null }, null, false, false)
-      }
-    }
-
+    
     // Sjekker om det er opprettet tidligere innplasseringssamtale, og henter saksnummer for P360
+    /*
     logger('info', [ver.appid, `Fetching caseNumber for employee ${employee.userPrincipalName}`])
     collection = db.collection(mongoDB.acosReportCollection)
     query = { ssn: employee.fodselsnummer, $or: [{ type: "innplasseringssamtale" }] }
     const caseNumber = await collection.findOne(query)
     employee.caseNumber = caseNumber?.caseNumber ?? null
+    */
 
-    logger('info', [ver.appid, `Innplassering - ${managerUpn} is manager or has exception for ${employeeUpn}, will return employeeData`])
+    logger('info', [ver.appid, `Innplassering - ${managerUpn} can innplassere ${employeeUpn}, will return employeeData`])
     return {
       status: 200,
-      body: repackInnplassering(employee, newUnit, krr, true)
+      body: repackInnplassering(employee, null, krr, true)
     }
   }
-
 
   // KARTLEGGINSSAMTALE
   // Vi går gjennom strukturer for aktive arbeidsforhold - sjekker om managerUpn ligger i maks nivå "variabel" som leder for den ansatte

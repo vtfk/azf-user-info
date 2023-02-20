@@ -108,6 +108,8 @@ const determineParam = (param) => {
     return { query: {}, searchProjection: reportProjection, type: 'report', orgId: param.substring(7, param.length) }
   } else if (param.toLowerCase() === 'newcounties') {
     return { query: {}, searchProjection: allProjection, type: 'newCounties' }
+  } else if (param.toLowerCase() === 'newcountiesall') {
+    return { query: {}, searchProjection: allProjection, type: 'newCountiesAll' }
   } else {
     return { query: { navn: { $regex: param, $options: 'i' } }, searchProjection: orgProjection, type: 'search' }
   }
@@ -183,39 +185,59 @@ module.exports = async function (context, req) {
       collection =  db.collection(mongoDB.telemarkOrgCollection)
       const telemark = await collection.find(newCountyQuery).toArray()
 
-      // Finn innplasseringsdata for alle ansatte som lederen har tilgang på - slå sammen med ansattobjektene
-      const leaderResult = {
-        vestfold: vestfold.forEach(unit => {
-          unit.arbeidsforhold = unit.arbeidsforhold.filter(emp => emp.userPrincipalName !== ver.upn) // Remove leader - should innplassere itself
-          unit.arbeidsforhold = unit.arbeidsforhold.map(emp => {
-            const innplassering = innplasseringsdata.find(employee => employee.ansattnummer === emp.ansattnummer) // Find corresponding innplasseringsdata
-            return {  
-              ...emp,
-              innplassering: innplassering ?? null
-            }
-          })
-        }),
-        telemark: telemark.forEach(unit => {
-          unit.arbeidsforhold = unit.arbeidsforhold.filter(emp => emp.userPrincipalName !== ver.upn) // Remove leader - should innplassere itself
-          unit.arbeidsforhold = unit.arbeidsforhold.map(emp => {
-            const innplassering = innplasseringsdata.find(employee => employee.employeeNumber === emp.ansattnummer) // Find corresponding innplasseringsdata
-            return {  
-              ...emp,
-              innplassering: innplassering ?? null
-            }
-          })
+      const mapCounty = (unit) => {
+        unit.arbeidsforhold = unit.arbeidsforhold.filter(emp => emp.userPrincipalName !== ver.upn) // Remove leader - should innplassere itself
+        unit.arbeidsforhold = unit.arbeidsforhold.map(emp => {
+          const innplassering = innplasseringsdata.find(employee => employee.ansattnummer === emp.ansattnummer) // Find corresponding innplasseringsdata
+          return {  
+            ...emp,
+            innplassering: innplassering ?? null
+          }
         })
+        return unit
       }
 
-      return { status: 200, body: { vestfold, telemark } }
-      // Find where ansattnummer is leader or midlertid leder in new counties
-      // If is leader
-      // Finn alle ansatte som lederen skal innplassere
-      // Finn alle ansatte som lederen allerede har innplassert
-      // returner dette til klient
-      
+      // Finn innplasseringsdata for alle ansatte som lederen har tilgang på - slå sammen med ansattobjektene
+      const leaderResult = {
+        vestfold: vestfold.map(unit => mapCounty(unit)),
+        telemark: telemark.map(unit => mapCounty(unit))
+      }
+      const innplassering = innplasseringsdata.find(emp => emp.employeeUpn === ver.upn) ?? null
 
-      // Check if ansattnummer have innplasseringssamtale - return samtale, else return null
+      return { status: 200, body: { units: leaderResult, innplassering } }
+    }
+
+    if (type === 'newCountiesAll') {
+      // Returner hele vestfold og hele telemark - om du er hr eller admin, returner også ansattforhold
+      // Get Acos reports with innplasseringsdata
+      collection = db.collection(mongoDB.acosReportCollection)
+      const innplasseringsdata = await collection.find( { type: 'innplasseringssamtale' } ).toArray()
+      
+      // Get new counties where caller is leader or temp leader
+      const newCountyQuery = {}
+      collection = db.collection(mongoDB.vestfoldOrgCollection)
+      const vestfold = await collection.find(newCountyQuery).toArray()
+
+      collection =  db.collection(mongoDB.telemarkOrgCollection)
+      const telemark = await collection.find(newCountyQuery).toArray()
+
+      const mapCounty = (unit) => {
+        unit.arbeidsforhold = unit.arbeidsforhold.map(emp => {
+          const innplassering = innplasseringsdata.find(employee => employee.ansattnummer === emp.ansattnummer) // Find corresponding innplasseringsdata
+          return {
+            ...emp,
+            innplassering: innplassering ?? null
+          }
+        })
+        return unit
+      }
+
+      // Finn innplasseringsdata for alle ansatte som lederen har tilgang på - slå sammen med ansattobjektene
+      const units = {
+        vestfold: vestfold.map(unit => mapCounty(unit)),
+        telemark: telemark.map(unit => mapCounty(unit))
+      }
+      return { status: 200, body: units }
     }
 
     let org = await collection.find(query).project(searchProjection).toArray()
