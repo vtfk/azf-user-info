@@ -76,7 +76,7 @@ module.exports = async function (context, req) {
         employeeNumber: 1,
         employeeName: 1,
         newCounty: 1,
-        newUnit: 1
+        newSection: 1
       }
       // Hent også acos-reports for innplassering
       collection = db.collection(mongoDB.acosReportCollection)
