@@ -34,7 +34,7 @@ module.exports = async function (context, req) {
     try {
       logger('info', ['Trying to update settings'])
       // Innplassering
-      if (req.body.innplassering) {
+      if (req.body.innplassering && !req.body.oblig) {
         const { ansattnummer, method, upn, name } = req.body
         collection = db.collection(mongoDB.innplasseringCollection)
         if (method === 'get') {
