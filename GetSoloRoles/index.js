@@ -41,15 +41,6 @@ module.exports = async function (context, req) {
             body: `You are not authorized to view this resource, ${ver.msg}`
         }
     }
-   
-    // const hasAccess = ver.roles.includes(appRoles.applicationRead)
-    // logger('info', [ver.appid, 'checked if has privileged role - result', hasAccess])
-    //     if (!hasAccess) {
-    //         return {
-    //             status: 401,
-    //             body: 'You are not authorized to view this resource, required role missing'
-    //         }
-    // }
 
     // If the user do not have the right role throw error
     const privileged = ver.roles.includes(appRoles.admin || appRoles.privileged)
