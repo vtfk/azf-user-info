@@ -1,5 +1,5 @@
 const mongo = require('../lib/mongo')
-const { mongoDB, appRoles, leaderLevel } = require('../config')
+const { mongoDB, appRoles, leaderLevel, kartleggingExceptions } = require('../config')
 const { verifyToken, isLeader } = require('../lib/verifyToken')
 const { logger, logConfig } = require('@vtfk/logger')
 const { employeeProjection, nameSearchProjection, filterEmployeeData, repackArbeidsforhold, innplasseringProjection } = require('../lib/employee/employeeProjections')
@@ -115,8 +115,12 @@ module.exports = async function (context, req) {
 
     const leaderPrivilege = isLeader(req.headers.authorization, structures, leaderLevel)
 
+    const kartleggingException = kartleggingExceptions[ver.upn] && kartleggingExceptions[ver.upn].includes(res[0].userPrincipalName)
+
     if (leaderPrivilege) {
       logger('info', [`${ver.upn} is leader for ${res[0].userPrincipalName} - level ${leaderLevel}`, 'Will expand result with competence data'])
+    } else if (kartleggingException) {
+      logger('info', [`${ver.upn} has kartleggings-exception for ${res[0].userPrincipalName}`, 'Will expand result with competence data'])
     } else {
       logger('info', [ver.upn, 'Not privileged', query, 'do not need competence data'])
       // Repack arbeidsforholdstyper
