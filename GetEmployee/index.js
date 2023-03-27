@@ -113,13 +113,17 @@ module.exports = async function (context, req) {
       return forhold.arbeidssted.struktur
     })
 
+    const shortNames = structures.map(structure => structure[0].kortnavn)
+
     const leaderPrivilege = isLeader(req.headers.authorization, structures, leaderLevel)
 
     const kartleggingException = kartleggingExceptions[ver.upn] && kartleggingExceptions[ver.upn].includes(res[0].userPrincipalName)
 
+    const kartleggingUnitException = kartleggingExceptions[ver.upn] && kartleggingExceptions[ver.upn].some(unit => shortNames.includes(unit))
+
     if (leaderPrivilege) {
       logger('info', [`${ver.upn} is leader for ${res[0].userPrincipalName} - level ${leaderLevel}`, 'Will expand result with competence data'])
-    } else if (kartleggingException) {
+    } else if (kartleggingException || kartleggingUnitException) {
       logger('info', [`${ver.upn} has kartleggings-exception for ${res[0].userPrincipalName}`, 'Will expand result with competence data'])
     } else {
       logger('info', [ver.upn, 'Not privileged', query, 'do not need competence data'])
