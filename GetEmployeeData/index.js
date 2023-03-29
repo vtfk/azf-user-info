@@ -125,6 +125,12 @@ module.exports = async function (context, req) {
   // KARTLEGGINSSAMTALE
   // Vi går gjennom strukturer for aktive arbeidsforhold - sjekker om managerUpn ligger i maks nivå "variabel" som leder for den ansatte
   let isLeader = false
+  
+  const structures = employee.aktiveArbeidsforhold.map(forhold => {
+    return forhold.arbeidssted.struktur
+  })
+  const shortNames = structures.map(structure => structure[0].kortnavn)
+
   for (const forhold of employee.aktiveArbeidsforhold) {
     const leaders = forhold.arbeidssted.struktur
       .slice(0, leaderLevel)
@@ -133,7 +139,11 @@ module.exports = async function (context, req) {
   }
   if (!isLeader) {
     logger('info', [ver.appid, `${managerUpn} is NOT manager for ${employeeUpn}, checking exception object`])
-    if (kartleggingExceptions[managerUpn] && kartleggingExceptions[managerUpn].includes(employeeUpn)) {
+
+    const kartleggingException = kartleggingExceptions[managerUpn] && kartleggingExceptions[managerUpn].includes(employeeUpn)
+    const kartleggingUnitException = kartleggingExceptions[managerUpn] && kartleggingExceptions[managerUpn].some(unit => shortNames.includes(unit))
+
+    if (kartleggingException || kartleggingUnitException) {
       logger('info', [ver.appid, `${managerUpn} has exception for ${employeeUpn}, will return employee data`])
       isLeader = true
     }
